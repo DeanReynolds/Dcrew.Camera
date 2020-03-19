@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <RootNamespace>Dcrew.MonoGame._2D_Camera</RootNamespace>
+    <Authors>Dcrew</Authors>
+    <Description>A highly-optimized, flexible and powerful 2D camera for MonoGame</Description>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <RepositoryUrl>https://github.com/DeanReynolds/Dcrew.MonoGame.2D-Camera</RepositoryUrl>
+    <PackageTags>MonoGame</PackageTags>
+    <Company>DcrewGames</Company>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MonoGame.Framework.DesktopGL.Core" Version="3.8.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\LICENSE">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+  </ItemGroup>
+
+</Project>
