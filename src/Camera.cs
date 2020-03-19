@@ -133,7 +133,7 @@ namespace Dcrew.MonoGame._2D_Camera
         /// <param name="position">2D vector position</param>
         /// <param name="angle">Z rotation</param>
         /// <param name="scale">Scale/Zoom</param>
-        /// <param name="viewportRes">Viewport resolution</param>
+        /// <param name="viewportRes">Main viewport resolution</param>
         /// <param name="virtualRes">Virtual resolution</param>
         public Camera(Vector2 position, float angle, Vector2 scale, (int Width, int Height) viewportRes, (int Width, int Height) virtualRes)
         {
@@ -160,6 +160,13 @@ namespace Dcrew.MonoGame._2D_Camera
                 M44 = 1
             };
         }
+        /// <summary>Create a 2D camera</summary>
+        /// <param name="position">2D vector position</param>
+        /// <param name="angle">Z rotation</param>
+        /// <param name="scale">Scale/Zoom</param>
+        /// <param name="viewport">Main game viewport</param>
+        /// <param name="virtualRes">Virtual resolution</param>
+        public Camera(Vector2 position, float angle, Vector2 scale, Viewport viewport, (int Width, int Height) virtualRes) : this(position, angle, scale, (viewport.Width, viewport.Height), virtualRes) { }
 
         /// <summary>Call once per frame and before using <see cref="MousePos"/></summary>
         /// <param name="mouseState">Null value will auto grab latest state</param>
