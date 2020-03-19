@@ -9,6 +9,8 @@
     <RepositoryUrl>https://github.com/DeanReynolds/Dcrew.MonoGame.2D-Camera</RepositoryUrl>
     <PackageTags>MonoGame</PackageTags>
     <Company>DcrewGames</Company>
+    <PackageId>Dcrew.MonoGame.2D_Camera</PackageId>
+    <Version>1.0.1</Version>
   </PropertyGroup>
 
   <ItemGroup>

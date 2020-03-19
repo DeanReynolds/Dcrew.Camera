@@ -5,7 +5,7 @@ using System;
 namespace Dcrew.MonoGame._2D_Camera
 {
     /// <summary>A highly-optimized, flexible and powerful 2D camera</summary>
-    class Camera
+    public class Camera
     {
         /// <summary>X position</summary>
         public float X
