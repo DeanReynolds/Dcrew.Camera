@@ -216,8 +216,7 @@ namespace Dcrew.MonoGame._2D_Camera
             _virtualScale = MathF.Min((float)_viewportRes.Width / _virtualRes.Width, (float)_viewportRes.Height / _virtualRes.Height);
             Apothem = new Vector2(_viewportRes.Width / 2f / _virtualScale, _viewportRes.Height / 2f / _virtualScale);
         }
-
-        private void UpdateViewportRes((int Width, int Height) value)
+        void UpdateViewportRes((int Width, int Height) value)
         {
             _viewportRes = value;
             _halfViewportRes = new Vector2(_viewportRes.Width / 2f, _viewportRes.Height / 2f);
