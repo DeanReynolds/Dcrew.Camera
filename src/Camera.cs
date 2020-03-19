@@ -108,9 +108,13 @@ namespace Dcrew.MonoGame._2D_Camera
                     _invertM12 = (float)-(_view.M12 * _n27);
                     _invertM22 = (float)(_view.M11 * _n27);
                     UpdatePos();
+                    _isDirty = 0;
                 }
                 else if (_isDirty.HasFlag(DirtyType.Pos))
+                {
                     UpdatePos();
+                    _isDirty = 0;
+                }
                 return _view;
             }
         }
