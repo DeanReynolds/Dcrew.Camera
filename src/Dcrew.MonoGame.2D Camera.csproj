@@ -10,7 +10,9 @@
     <PackageTags>MonoGame</PackageTags>
     <Company>DcrewGames</Company>
     <PackageId>Dcrew.MonoGame.2D_Camera</PackageId>
-    <Version>1.0.3</Version>
+    <Version>1.0.4</Version>
+    <PackageIcon>icon.png</PackageIcon>
+    <PackageIconUrl />
   </PropertyGroup>
 
   <ItemGroup>
@@ -18,6 +20,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="..\icon.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
     <None Include="..\LICENSE">
       <Pack>True</Pack>
       <PackagePath></PackagePath>
