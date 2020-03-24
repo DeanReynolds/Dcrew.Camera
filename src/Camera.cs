@@ -162,8 +162,8 @@ namespace Dcrew.MonoGame._2D_Camera
             _position = position;
             _angle = angle;
             _scale = scale;
-            _viewportRes = viewportRes;
             _virtualRes = virtualRes;
+            UpdateViewportRes(viewportRes);
             _scaleMatrix = _viewMatrix = new Matrix
             {
                 M33 = 1,
