@@ -45,9 +45,8 @@ namespace Dcrew.MonoGame._2D_Camera
             get => _angle;
             set
             {
-                _rotM11 = MathF.Cos(-(_angle = value));
-                _rotM12 = MathF.Sin(-_angle);
-                _isDirty |= DirtyType.AngleOrScale;
+                _angle = value;
+                _isDirty |= DirtyType.Angle;
             }
         }
         /// <summary>Scale/Zoom</summary>
@@ -57,7 +56,7 @@ namespace Dcrew.MonoGame._2D_Camera
             set
             {
                 _scale = value;
-                _isDirty |= DirtyType.AngleOrScale;
+                _isDirty |= DirtyType.Scale;
             }
         }
         /// <summary>Viewport resolution</summary>
@@ -69,7 +68,7 @@ namespace Dcrew.MonoGame._2D_Camera
                 if (_viewportRes != value)
                 {
                     UpdateViewportRes(value);
-                    _isDirty |= DirtyType.AngleOrScale;
+                    _isDirty |= DirtyType.Scale;
                     _projectionMatrix.M11 = (float)(2d / _viewportRes.Width);
                     _projectionMatrix.M22 = (float)(2d / -_viewportRes.Height);
                 }
@@ -83,10 +82,9 @@ namespace Dcrew.MonoGame._2D_Camera
             {
                 _virtualRes = value;
                 UpdateOrigin();
-                _isDirty |= DirtyType.AngleOrScale;
+                _isDirty |= DirtyType.Scale;
             }
         }
-
         /// <summary>Origin/center-point (doesn't account for <see cref="Scale"/> or <see cref="Angle"/>)</summary>
         public Vector2 Origin { get; private set; }
 
@@ -95,14 +93,14 @@ namespace Dcrew.MonoGame._2D_Camera
         {
             get
             {
-                if (_isDirty.HasFlag(DirtyType.AngleOrScale))
+                if (_isDirty != 0)
                 {
-                    UpdateScale();
-                    _isDirty = 0;
-                }
-                else if (_isDirty.HasFlag(DirtyType.Pos))
-                {
-                    UpdatePos();
+                    if (_isDirty.HasFlag(DirtyType.Angle))
+                        UpdateAngle();
+                    else if (_isDirty.HasFlag(DirtyType.Scale))
+                        UpdateScale();
+                    else if (_isDirty.HasFlag(DirtyType.Pos))
+                        UpdatePos();
                     _isDirty = 0;
                 }
                 return _viewMatrix;
@@ -113,15 +111,15 @@ namespace Dcrew.MonoGame._2D_Camera
         {
             get
             {
-                if (_isDirty.HasFlag(DirtyType.AngleOrScale))
+                if (_isDirty.HasFlag(DirtyType.Scale))
                 {
                     UpdateScale();
-                    _isDirty = 0;
+                    _isDirty &= ~DirtyType.Scale;
                 }
                 return _scaleMatrix;
             }
         }
-        public float VirtualScale => _virtualScale;
+        public float VirtualScale { get; private set; }
 
         /// <summary>Mouse/Cursor position, make sure to call <see cref="UpdateMousePos(MouseState?)"/> once per frame before using this</summary>
         public Vector2 MousePos => _mousePosition;
@@ -130,19 +128,17 @@ namespace Dcrew.MonoGame._2D_Camera
 
         Vector2 _position,
             _scale,
-            _actualScale,
             _halfViewportRes,
             _mousePosition;
         float _angle,
-            _rotM11,
-            _rotM12,
+            _rotCos,
+            _rotSin,
             _invertM11,
             _invertM12,
             _invertM21,
             _invertM22,
             _invertM41,
-            _invertM42,
-            _virtualScale;
+            _invertM42;
         double _n27;
         DirtyType _isDirty;
         Matrix _viewMatrix,
@@ -153,7 +149,7 @@ namespace Dcrew.MonoGame._2D_Camera
             _virtualRes;
 
         [Flags]
-        enum DirtyType : byte { Pos = 1, AngleOrScale = 2 }
+        enum DirtyType : byte { Pos = 1, Angle = 2, Scale = 4 }
 
         /// <summary>Create a 2D camera</summary>
         /// <param name="position">2D vector position</param>
@@ -163,11 +159,10 @@ namespace Dcrew.MonoGame._2D_Camera
         /// <param name="virtualRes">Virtual resolution</param>
         public Camera(Vector2 position, float angle, Vector2 scale, (int Width, int Height) viewportRes, (int Width, int Height) virtualRes)
         {
-            _position.X = position.X;
-            _position.Y = position.Y;
-            _rotM11 = MathF.Cos(-(_angle = angle));
-            _rotM12 = MathF.Sin(-_angle);
+            _position = position;
+            _angle = angle;
             _scale = scale;
+            _viewportRes = viewportRes;
             _virtualRes = virtualRes;
             _scaleMatrix = _viewMatrix = new Matrix
             {
@@ -190,7 +185,7 @@ namespace Dcrew.MonoGame._2D_Camera
                 M42 = 1,
                 M44 = 1
             };
-            ViewportRes = viewportRes;
+            _isDirty |= DirtyType.Angle;
         }
         /// <summary>Create a 2D camera</summary>
         /// <param name="position">2D vector position</param>
@@ -213,35 +208,38 @@ namespace Dcrew.MonoGame._2D_Camera
 
         void UpdatePos()
         {
-            float m41 = -_position.X * _actualScale.X,
-                m42 = -_position.Y * _actualScale.Y;
-            _viewMatrix.M41 = (m41 * _rotM11) + (m42 * -_rotM12) + _halfViewportRes.X;
-            _viewMatrix.M42 = (m41 * _rotM12) + (m42 * _rotM11) + _halfViewportRes.Y;
+            float m41 = -_position.X * _scaleMatrix.M11,
+                m42 = -_position.Y * _scaleMatrix.M22;
+            _viewMatrix.M41 = (m41 * _rotCos) + (m42 * -_rotSin) + _halfViewportRes.X;
+            _viewMatrix.M42 = (m41 * _rotSin) + (m42 * _rotCos) + _halfViewportRes.Y;
             _invertM41 = (float)(-((double)_viewMatrix.M21 * -_viewMatrix.M42 - (double)_viewMatrix.M22 * -_viewMatrix.M41) * _n27);
             _invertM42 = (float)(((double)_viewMatrix.M11 * -_viewMatrix.M42 - (double)_viewMatrix.M12 * -_viewMatrix.M41) * _n27);
         }
         void UpdateScale()
         {
-            _actualScale = new Vector2(_scale.X * _virtualScale, _scale.Y * _virtualScale);
-            _viewMatrix.M11 = _actualScale.X * _rotM11;
-            _viewMatrix.M12 = _actualScale.Y * _rotM12;
-            _viewMatrix.M21 = _actualScale.X * -_rotM12;
-            _viewMatrix.M22 = _actualScale.Y * _rotM11;
-            _scaleMatrix.M11 = _actualScale.X;
-            _scaleMatrix.M22 = _actualScale.Y;
+            _scaleMatrix.M11 = _scale.X * VirtualScale;
+            _scaleMatrix.M22 = _scale.Y * VirtualScale;
+            _viewMatrix.M11 = _scaleMatrix.M11 * _rotCos;
+            _viewMatrix.M12 = _scaleMatrix.M22 * _rotSin;
+            _viewMatrix.M21 = _scaleMatrix.M11 * -_rotSin;
+            _viewMatrix.M22 = _scaleMatrix.M22 * _rotCos;
             _n27 = 1d / ((double)_viewMatrix.M11 * _viewMatrix.M22 + (double)_viewMatrix.M12 * -_viewMatrix.M21);
             _invertM11 = (float)(_viewMatrix.M22 * _n27);
-            _invertM21 = (float)(-_viewMatrix.M21 * _n27);
             _invertM12 = (float)-(_viewMatrix.M12 * _n27);
+            _invertM21 = (float)(-_viewMatrix.M21 * _n27);
             _invertM22 = (float)(_viewMatrix.M11 * _n27);
             UpdatePos();
         }
+        void UpdateAngle()
+        {
+            _rotCos = MathF.Cos(-_angle);
+            _rotSin = MathF.Sin(-_angle);
+            UpdateScale();
+        }
         void UpdateOrigin()
         {
-            _virtualScale = MathF.Min((float)_viewportRes.Width / _virtualRes.Width, (float)_viewportRes.Height / _virtualRes.Height);
-            Origin = new Vector2(_viewportRes.Width / 2f / _virtualScale, _viewportRes.Height / 2f / _virtualScale);
-            _originMatrix.M41 = Origin.X;
-            _originMatrix.M42 = Origin.Y;
+            VirtualScale = MathF.Min((float)_viewportRes.Width / _virtualRes.Width, (float)_viewportRes.Height / _virtualRes.Height);
+            Origin = new Vector2(_originMatrix.M41 = _halfViewportRes.X / VirtualScale, _originMatrix.M42 = _halfViewportRes.Y / VirtualScale);
         }
         void UpdateViewportRes((int Width, int Height) value)
         {
