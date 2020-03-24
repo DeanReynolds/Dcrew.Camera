@@ -82,13 +82,13 @@ namespace Dcrew.MonoGame._2D_Camera
             set
             {
                 _virtualRes = value;
-                UpdateApothem();
+                UpdateOrigin();
                 _isDirty |= DirtyType.AngleOrScale;
             }
         }
 
-        /// <summary>X/Y view-bound apothem (doesn't account for <see cref="Scale"/>)</summary>
-        public Vector2 Apothem { get; private set; }
+        /// <summary>Origin/center-point (doesn't account for <see cref="Scale"/> or <see cref="Angle"/>)</summary>
+        public Vector2 Origin { get; private set; }
 
         /// <summary>View/Transform matrix</summary>
         public Matrix View
@@ -235,10 +235,10 @@ namespace Dcrew.MonoGame._2D_Camera
             _invertM22 = (float)(_viewMatrix.M11 * _n27);
             UpdatePos();
         }
-        void UpdateApothem()
+        void UpdateOrigin()
         {
             _virtualScale = MathF.Min((float)_viewportRes.Width / _virtualRes.Width, (float)_viewportRes.Height / _virtualRes.Height);
-            Apothem = new Vector2(_viewportRes.Width / 2f / _virtualScale, _viewportRes.Height / 2f / _virtualScale);
+            Origin = new Vector2(_viewportRes.Width / 2f / _virtualScale, _viewportRes.Height / 2f / _virtualScale);
             _originMatrix.M41 = Origin.X;
             _originMatrix.M42 = Origin.Y;
         }
@@ -246,7 +246,7 @@ namespace Dcrew.MonoGame._2D_Camera
         {
             _viewportRes = value;
             _halfViewportRes = new Vector2(_viewportRes.Width / 2f, _viewportRes.Height / 2f);
-            UpdateApothem();
+            UpdateOrigin();
         }
     }
 }
