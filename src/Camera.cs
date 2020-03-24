@@ -121,6 +121,7 @@ namespace Dcrew.MonoGame._2D_Camera
                 return _scaleMatrix;
             }
         }
+        public float VirtualScale => _virtualScale;
 
         /// <summary>Mouse/Cursor position, make sure to call <see cref="UpdateMousePos(MouseState?)"/> once per frame before using this</summary>
         public Vector2 MousePos => _mousePosition;
