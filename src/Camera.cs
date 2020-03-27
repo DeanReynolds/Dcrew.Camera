@@ -83,6 +83,7 @@ namespace Dcrew.MonoGame._2D_Camera
             set
             {
                 _virtualRes = value;
+                _hasVirtualRes = value.Width > 0 && value.Height > 0;
                 UpdateOrigin();
                 _isDirty |= DirtyType.Scale;
             }
@@ -149,21 +150,23 @@ namespace Dcrew.MonoGame._2D_Camera
             _scaleMatrix;
         (int Width, int Height) _viewportRes,
             _virtualRes;
+        bool _hasVirtualRes;
 
         [Flags]
         enum DirtyType : byte { Pos = 1, Angle = 2, Scale = 4 }
 
         /// <summary>Create a 2D camera</summary>
-        /// <param name="position">2D vector position</param>
+        /// <param name="pos">2D vector position</param>
         /// <param name="angle">Z rotation</param>
         /// <param name="scale">Scale/Zoom</param>
         /// <param name="virtualRes">Virtual resolution</param>
-        public Camera(Vector2 position, float angle, Vector2 scale, (int Width, int Height) virtualRes)
+        public Camera(Vector2 pos, float angle, Vector2 scale, (int Width, int Height) virtualRes)
         {
-            _position = position;
+            _position = pos;
             _angle = angle;
             _scale = scale;
             _virtualRes = virtualRes;
+            _hasVirtualRes = virtualRes.Width > 0 && virtualRes.Height > 0;
             UpdateViewportRes(_graphicsDevice.Viewport.Width, _graphicsDevice.Viewport.Height);
             _graphicsDevice.DeviceReset += WindowSizeChanged;
             _window.ClientSizeChanged += WindowSizeChanged;
@@ -190,6 +193,11 @@ namespace Dcrew.MonoGame._2D_Camera
             };
             _isDirty |= DirtyType.Angle;
         }
+        /// <summary>Create a 2D camera</summary>
+        /// <param name="pos">2D vector position</param>
+        /// <param name="angle">Z rotation</param>
+        /// <param name="scale">Scale/Zoom</param>
+        public Camera(Vector2 pos, float angle, Vector2 scale) : this(pos, angle, scale, (0, 0)) { }
 
         /// <summary>Call once per frame and before using <see cref="MousePos"/></summary>
         /// <param name="mouseState">Null value will auto grab latest state</param>
@@ -241,7 +249,7 @@ namespace Dcrew.MonoGame._2D_Camera
         }
         void UpdateOrigin()
         {
-            VirtualScale = MathF.Min((float)_viewportRes.Width / _virtualRes.Width, (float)_viewportRes.Height / _virtualRes.Height);
+            VirtualScale = _hasVirtualRes ? MathF.Min((float)_viewportRes.Width / _virtualRes.Width, (float)_viewportRes.Height / _virtualRes.Height) : 1;
             Origin = new Vector2(_originMatrix.M41 = _origin.X / VirtualScale, _originMatrix.M42 = _origin.Y / VirtualScale);
         }
         void UpdateViewportRes(int width, int height)
@@ -254,7 +262,12 @@ namespace Dcrew.MonoGame._2D_Camera
             _projectionMatrix.M22 = (float)(2d / -_viewportRes.Height);
         }
 
-        void WindowSizeChanged(object sender, EventArgs e) => ScaleViewportToVirtualRes();
+        void WindowSizeChanged(object sender, EventArgs e)
+        {
+            if (_hasVirtualRes)
+                ScaleViewportToVirtualRes();
+            UpdateViewportRes(_graphicsDevice.Viewport.Width, _graphicsDevice.Viewport.Height);
+        }
 
         void ScaleViewportToVirtualRes()
         {
@@ -268,7 +281,6 @@ namespace Dcrew.MonoGame._2D_Camera
             }
             _graphicsDevice.SetRenderTarget(null);
             _graphicsDevice.Viewport = new Viewport((_graphicsDevice.PresentationParameters.BackBufferWidth / 2) - (width2 / 2), (_graphicsDevice.PresentationParameters.BackBufferHeight / 2) - (height2 / 2), width2, height2);
-            UpdateViewportRes(_graphicsDevice.Viewport.Width, _graphicsDevice.Viewport.Height);
         }
     }
 }
