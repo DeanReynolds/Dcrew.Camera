@@ -13,9 +13,6 @@ namespace Dcrew.MonoGame._2D_Camera
         static readonly GraphicsDevice _graphicsDevice;
         static readonly GameWindow _window;
 
-        static (int Width, int Height) _oldViewportRes,
-            _oldRes;
-
         static Camera()
         {
             foreach (var p in typeof(Game).GetProperties(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Static))
