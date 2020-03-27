@@ -2,12 +2,29 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
+using System.Reflection;
 
 namespace Dcrew.MonoGame._2D_Camera
 {
     /// <summary>A highly-optimized, flexible and powerful 2D camera</summary>
-    public sealed class Camera
+    public sealed class Camera : IDisposable
     {
+        static readonly Game _game;
+        static readonly GraphicsDevice _graphicsDevice;
+        static readonly GameWindow _window;
+
+        static (int Width, int Height) _oldViewportRes,
+            _oldRes;
+
+        static Camera()
+        {
+            foreach (var p in typeof(Game).GetProperties(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Static))
+                if (p.GetValue(_game) is Game g)
+                    _game = g;
+            _graphicsDevice = _game.GraphicsDevice;
+            _window = _game.Window;
+        }
+
         /// <summary>X position</summary>
         public float X
         {
@@ -57,21 +74,6 @@ namespace Dcrew.MonoGame._2D_Camera
             {
                 _scale = value;
                 _isDirty |= DirtyType.Scale;
-            }
-        }
-        /// <summary>Viewport resolution</summary>
-        public (int Width, int Height) ViewportRes
-        {
-            get => _viewportRes;
-            set
-            {
-                if (_viewportRes != value)
-                {
-                    UpdateViewportRes(value);
-                    _isDirty |= DirtyType.Scale;
-                    _projectionMatrix.M11 = (float)(2d / _viewportRes.Width);
-                    _projectionMatrix.M22 = (float)(2d / -_viewportRes.Height);
-                }
             }
         }
         /// <summary>Virtual resolution</summary>
@@ -128,7 +130,7 @@ namespace Dcrew.MonoGame._2D_Camera
 
         Vector2 _position,
             _scale,
-            _halfViewportRes,
+            _origin,
             _mousePosition;
         float _angle,
             _rotCos,
@@ -155,15 +157,16 @@ namespace Dcrew.MonoGame._2D_Camera
         /// <param name="position">2D vector position</param>
         /// <param name="angle">Z rotation</param>
         /// <param name="scale">Scale/Zoom</param>
-        /// <param name="viewportRes">Main viewport resolution</param>
         /// <param name="virtualRes">Virtual resolution</param>
-        public Camera(Vector2 position, float angle, Vector2 scale, (int Width, int Height) viewportRes, (int Width, int Height) virtualRes)
+        public Camera(Vector2 position, float angle, Vector2 scale, (int Width, int Height) virtualRes)
         {
             _position = position;
             _angle = angle;
             _scale = scale;
             _virtualRes = virtualRes;
-            UpdateViewportRes(viewportRes);
+            UpdateViewportRes(_graphicsDevice.Viewport.Width, _graphicsDevice.Viewport.Height);
+            _graphicsDevice.DeviceReset += WindowSizeChanged;
+            _window.ClientSizeChanged += WindowSizeChanged;
             _scaleMatrix = _viewMatrix = new Matrix
             {
                 M33 = 1,
@@ -187,13 +190,6 @@ namespace Dcrew.MonoGame._2D_Camera
             };
             _isDirty |= DirtyType.Angle;
         }
-        /// <summary>Create a 2D camera</summary>
-        /// <param name="position">2D vector position</param>
-        /// <param name="angle">Z rotation</param>
-        /// <param name="scale">Scale/Zoom</param>
-        /// <param name="viewport">Main game viewport</param>
-        /// <param name="virtualRes">Virtual resolution</param>
-        public Camera(Vector2 position, float angle, Vector2 scale, Viewport viewport, (int Width, int Height) virtualRes) : this(position, angle, scale, (viewport.Width, viewport.Height), virtualRes) { }
 
         /// <summary>Call once per frame and before using <see cref="MousePos"/></summary>
         /// <param name="mouseState">Null value will auto grab latest state</param>
@@ -206,12 +202,19 @@ namespace Dcrew.MonoGame._2D_Camera
             _mousePosition.Y = mouseX * _invertM12 + (mouseY * _invertM22) + _invertM42;
         }
 
+        /// <summary>Removes <see cref="Game.GraphicsDevice"/> and <see cref="Game.Window"/> reset/size-changed events for keeping <see cref="Origin"/> updated</summary>
+        public void Dispose()
+        {
+            _window.ClientSizeChanged -= WindowSizeChanged;
+            _graphicsDevice.DeviceReset -= WindowSizeChanged;
+        }
+
         void UpdatePos()
         {
             float m41 = -_position.X * _scaleMatrix.M11,
                 m42 = -_position.Y * _scaleMatrix.M22;
-            _viewMatrix.M41 = (m41 * _rotCos) + (m42 * -_rotSin) + _halfViewportRes.X;
-            _viewMatrix.M42 = (m41 * _rotSin) + (m42 * _rotCos) + _halfViewportRes.Y;
+            _viewMatrix.M41 = (m41 * _rotCos) + (m42 * -_rotSin) + _origin.X;
+            _viewMatrix.M42 = (m41 * _rotSin) + (m42 * _rotCos) + _origin.Y;
             _invertM41 = (float)(-((double)_viewMatrix.M21 * -_viewMatrix.M42 - (double)_viewMatrix.M22 * -_viewMatrix.M41) * _n27);
             _invertM42 = (float)(((double)_viewMatrix.M11 * -_viewMatrix.M42 - (double)_viewMatrix.M12 * -_viewMatrix.M41) * _n27);
         }
@@ -239,13 +242,33 @@ namespace Dcrew.MonoGame._2D_Camera
         void UpdateOrigin()
         {
             VirtualScale = MathF.Min((float)_viewportRes.Width / _virtualRes.Width, (float)_viewportRes.Height / _virtualRes.Height);
-            Origin = new Vector2(_originMatrix.M41 = _halfViewportRes.X / VirtualScale, _originMatrix.M42 = _halfViewportRes.Y / VirtualScale);
+            Origin = new Vector2(_originMatrix.M41 = _origin.X / VirtualScale, _originMatrix.M42 = _origin.Y / VirtualScale);
         }
-        void UpdateViewportRes((int Width, int Height) value)
+        void UpdateViewportRes(int width, int height)
         {
-            _viewportRes = value;
-            _halfViewportRes = new Vector2(_viewportRes.Width / 2f, _viewportRes.Height / 2f);
+            _viewportRes = (width, height);
+            _origin = new Vector2(width / 2f, height / 2f);
             UpdateOrigin();
+            _isDirty |= DirtyType.Scale;
+            _projectionMatrix.M11 = (float)(2d / _viewportRes.Width);
+            _projectionMatrix.M22 = (float)(2d / -_viewportRes.Height);
+        }
+
+        void WindowSizeChanged(object sender, EventArgs e) => ScaleViewportToVirtualRes();
+
+        void ScaleViewportToVirtualRes()
+        {
+            var targetAspectRatio = _virtualRes.Width / (float)_virtualRes.Height;
+            var width2 = _graphicsDevice.PresentationParameters.BackBufferWidth;
+            var height2 = (int)(width2 / targetAspectRatio + .5f);
+            if (height2 > _graphicsDevice.PresentationParameters.BackBufferHeight)
+            {
+                height2 = _graphicsDevice.PresentationParameters.BackBufferHeight;
+                width2 = (int)(height2 * targetAspectRatio + .5f);
+            }
+            _graphicsDevice.SetRenderTarget(null);
+            _graphicsDevice.Viewport = new Viewport((_graphicsDevice.PresentationParameters.BackBufferWidth / 2) - (width2 / 2), (_graphicsDevice.PresentationParameters.BackBufferHeight / 2) - (height2 / 2), width2, height2);
+            UpdateViewportRes(_graphicsDevice.Viewport.Width, _graphicsDevice.Viewport.Height);
         }
     }
 }
