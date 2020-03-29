@@ -97,6 +97,7 @@ namespace Dcrew.MonoGame._2D_Camera
                 return _viewMatrix;
             }
         }
+        public Matrix Invert => _invertMatrix;
         public Matrix OriginMatrix => _originMatrix;
         public Matrix ScaleMatrix
         {
