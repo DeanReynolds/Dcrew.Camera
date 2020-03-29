@@ -133,15 +133,10 @@ namespace Dcrew.MonoGame._2D_Camera
         float _angle,
             _rotCos,
             _rotSin,
-            _invertM11,
-            _invertM12,
-            _invertM21,
-            _invertM22,
-            _invertM41,
-            _invertM42;
-        double _n27;
+            _n27;
         DirtyType _isDirty;
         Matrix _viewMatrix,
+            _invertMatrix,
             _projectionMatrix,
             _originMatrix,
             _scaleMatrix;
@@ -167,7 +162,7 @@ namespace Dcrew.MonoGame._2D_Camera
             UpdateViewportRes(_graphicsDevice.Viewport.Width, _graphicsDevice.Viewport.Height);
             _graphicsDevice.DeviceReset += WindowSizeChanged;
             _window.ClientSizeChanged += WindowSizeChanged;
-            _scaleMatrix = _viewMatrix = new Matrix
+            _scaleMatrix = _invertMatrix = _viewMatrix = new Matrix
             {
                 M33 = 1,
                 M44 = 1
@@ -220,8 +215,10 @@ namespace Dcrew.MonoGame._2D_Camera
                 m42 = -_position.Y * _scaleMatrix.M22;
             _viewMatrix.M41 = (m41 * _rotCos) + (m42 * -_rotSin) + _origin.X;
             _viewMatrix.M42 = (m41 * _rotSin) + (m42 * _rotCos) + _origin.Y;
-            _invertM41 = (float)(-((double)_viewMatrix.M21 * -_viewMatrix.M42 - (double)_viewMatrix.M22 * -_viewMatrix.M41) * _n27);
-            _invertM42 = (float)(((double)_viewMatrix.M11 * -_viewMatrix.M42 - (double)_viewMatrix.M12 * -_viewMatrix.M41) * _n27);
+            float num19 = -_viewMatrix.M42;
+            float num21 = -_viewMatrix.M41;
+            _invertMatrix.M41 = (float)-(_viewMatrix.M21 * (double)num19 - _viewMatrix.M22 * (double)num21) * _n27;
+            _invertMatrix.M42 = (float)(_viewMatrix.M11 * (double)num19 - _viewMatrix.M12 * (double)num21) * _n27;
         }
         void UpdateScale()
         {
@@ -231,11 +228,12 @@ namespace Dcrew.MonoGame._2D_Camera
             _viewMatrix.M12 = _scaleMatrix.M22 * _rotSin;
             _viewMatrix.M21 = _scaleMatrix.M11 * -_rotSin;
             _viewMatrix.M22 = _scaleMatrix.M22 * _rotCos;
-            _n27 = 1d / ((double)_viewMatrix.M11 * _viewMatrix.M22 + (double)_viewMatrix.M12 * -_viewMatrix.M21);
-            _invertM11 = (float)(_viewMatrix.M22 * _n27);
-            _invertM12 = (float)-(_viewMatrix.M12 * _n27);
-            _invertM21 = (float)(-_viewMatrix.M21 * _n27);
-            _invertM22 = (float)(_viewMatrix.M11 * _n27);
+            float n24 = -_viewMatrix.M21;
+            _n27 = (float)(1 / (_viewMatrix.M11 * (double)_viewMatrix.M22 + _viewMatrix.M12 * (double)n24));
+            _invertMatrix.M11 = _viewMatrix.M22 * _n27;
+            _invertMatrix.M12 = -_viewMatrix.M12 * _n27;
+            _invertMatrix.M21 = n24 * _n27;
+            _invertMatrix.M22 = _viewMatrix.M11 * _n27;
             UpdatePos();
         }
         void UpdateAngle()
