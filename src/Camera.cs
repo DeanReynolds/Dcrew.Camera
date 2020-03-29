@@ -197,6 +197,8 @@ namespace Dcrew.MonoGame._2D_Camera
         public Vector2 ScreenToWorld(Vector2 pos) => ScreenToWorld(pos.X, pos.Y);
         /// <summary>Converts screen coords to world coords</summary>
         public Point ScreenToWorld(Point pos) => ScreenToWorld(pos.X, pos.Y).ToPoint();
+        /// <summary>Returns the scale of the world in relation to the screen</summary>
+        public float ScreenToWorldScale() => 1 / Vector2.Distance(ScreenToWorld(0, 0), ScreenToWorld(1, 0));
         /// <summary>Converts world coords to screen coords</summary>
         public Vector2 WorldToScreen(float x, float y)
         {
@@ -207,6 +209,8 @@ namespace Dcrew.MonoGame._2D_Camera
         public Vector2 WorldToScreen(Vector2 pos) => WorldToScreen(pos.X, pos.Y);
         /// <summary>Converts world coords to screen coords</summary>
         public Point WorldToScreen(Point pos) => WorldToScreen(pos.X, pos.Y).ToPoint();
+        /// <summary>Returns the scale of the screen in relation to the world</summary>
+        public float WorldToScreenScale() => Vector2.Distance(WorldToScreen(0, 0), WorldToScreen(1, 0));
 
         /// <summary>Call once per frame and before using <see cref="MousePos"/></summary>
         /// <param name="mouseState">Null value will auto grab latest state</param>
