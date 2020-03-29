@@ -93,16 +93,7 @@ namespace Dcrew.MonoGame._2D_Camera
         {
             get
             {
-                if (_isDirty != 0)
-                {
-                    if (_isDirty.HasFlag(DirtyType.Angle))
-                        UpdateAngle();
-                    else if (_isDirty.HasFlag(DirtyType.Scale))
-                        UpdateScale();
-                    else if (_isDirty.HasFlag(DirtyType.Pos))
-                        UpdatePos();
-                    _isDirty = 0;
-                }
+                UpdateDirtyView();
                 return _viewMatrix;
             }
         }
@@ -255,6 +246,19 @@ namespace Dcrew.MonoGame._2D_Camera
             _isDirty |= DirtyType.Scale;
             _projectionMatrix.M11 = (float)(2d / _viewportRes.Width);
             _projectionMatrix.M22 = (float)(2d / -_viewportRes.Height);
+        }
+        void UpdateDirtyView()
+        {
+            if (_isDirty != 0)
+            {
+                if (_isDirty.HasFlag(DirtyType.Angle))
+                    UpdateAngle();
+                else if (_isDirty.HasFlag(DirtyType.Scale))
+                    UpdateScale();
+                else if (_isDirty.HasFlag(DirtyType.Pos))
+                    UpdatePos();
+                _isDirty = 0;
+            }
         }
 
         void WindowSizeChanged(object sender, EventArgs e)
