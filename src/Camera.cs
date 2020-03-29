@@ -187,6 +187,27 @@ namespace Dcrew.MonoGame._2D_Camera
         /// <param name="scale">Scale/Zoom</param>
         public Camera(Vector2 pos, float angle, Vector2 scale) : this(pos, angle, scale, (0, 0)) { }
 
+        /// <summary>Converts screen coords to world coords</summary>
+        public Vector2 ScreenToWorld(float x, float y)
+        {
+            UpdateDirtyView();
+            return new Vector2(x * _invertMatrix.M11 + (y * _invertMatrix.M21) + _invertMatrix.M41, x * _invertMatrix.M12 + (y * _invertMatrix.M22) + _invertMatrix.M42);
+        }
+        /// <summary>Converts screen coords to world coords</summary>
+        public Vector2 ScreenToWorld(Vector2 pos) => ScreenToWorld(pos.X, pos.Y);
+        /// <summary>Converts screen coords to world coords</summary>
+        public Point ScreenToWorld(Point pos) => ScreenToWorld(pos.X, pos.Y).ToPoint();
+        /// <summary>Converts world coords to screen coords</summary>
+        public Vector2 WorldToScreen(float x, float y)
+        {
+            UpdateDirtyView();
+            return new Vector2(x * _viewMatrix.M11 + (y * _viewMatrix.M21) + _viewMatrix.M41 + x, x * _viewMatrix.M12 + (y * _viewMatrix.M22) + _viewMatrix.M42 + y);
+        }
+        /// <summary>Converts world coords to screen coords</summary>
+        public Vector2 WorldToScreen(Vector2 pos) => WorldToScreen(pos.X, pos.Y);
+        /// <summary>Converts world coords to screen coords</summary>
+        public Point WorldToScreen(Point pos) => WorldToScreen(pos.X, pos.Y).ToPoint();
+
         /// <summary>Call once per frame and before using <see cref="MousePos"/></summary>
         /// <param name="mouseState">Null value will auto grab latest state</param>
         public void UpdateMousePos(MouseState? mouseState = null)
@@ -194,8 +215,7 @@ namespace Dcrew.MonoGame._2D_Camera
             mouseState ??= Mouse.GetState();
             int mouseX = mouseState.Value.Position.X,
                 mouseY = mouseState.Value.Position.Y;
-            _mousePosition.X = mouseX * _invertM11 + (mouseY * _invertM21) + _invertM41;
-            _mousePosition.Y = mouseX * _invertM12 + (mouseY * _invertM22) + _invertM42;
+            _mousePosition = ScreenToWorld(mouseX, mouseY);
         }
 
         /// <summary>Removes <see cref="Game.GraphicsDevice"/> and <see cref="Game.Window"/> reset/size-changed events for keeping <see cref="Origin"/> updated</summary>
