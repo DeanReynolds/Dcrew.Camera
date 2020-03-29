@@ -53,7 +53,7 @@ namespace Dcrew.MonoGame._2D_Camera
                 _isDirty |= DirtyType.Pos;
             }
         }
-        /// <summary>Z rotation</summary>
+        /// <summary>Z rotation (in radians)</summary>
         public float Angle
         {
             get => _angle;
@@ -97,8 +97,13 @@ namespace Dcrew.MonoGame._2D_Camera
                 return _viewMatrix;
             }
         }
+        /// <summary>Invert of <see cref="View"/></summary>
         public Matrix Invert => _invertMatrix;
+        /// <summary>Projection matrix</summary>
+        public Matrix Projection => _projectionMatrix;
+        /// <summary>Matrix dedicated to <see cref="Origin"/></summary>
         public Matrix OriginMatrix => _originMatrix;
+        /// <summary>Matrix dedicated to <see cref="Scale"/></summary>
         public Matrix ScaleMatrix
         {
             get
@@ -111,12 +116,11 @@ namespace Dcrew.MonoGame._2D_Camera
                 return _scaleMatrix;
             }
         }
+        /// <summary>Scale for <see cref="VirtualRes"/> in relation to the games' viewport res</summary>
         public float VirtualScale { get; private set; }
 
         /// <summary>Mouse/Cursor position, make sure to call <see cref="UpdateMousePos(MouseState?)"/> once per frame before using this</summary>
         public Vector2 MousePos => _mousePosition;
-        /// <summary>Projection matrix</summary>
-        public Matrix Projection => _projectionMatrix;
 
         Vector2 _position,
             _scale,
