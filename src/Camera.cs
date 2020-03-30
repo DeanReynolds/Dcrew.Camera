@@ -42,7 +42,7 @@ namespace Dcrew.MonoGame._2D_Camera
                 _isDirty |= DirtyType.Pos;
             }
         }
-        /// <summary>2D vector position</summary>
+        /// <summary>Position</summary>
         public Vector2 Pos
         {
             get => _position;
@@ -144,8 +144,8 @@ namespace Dcrew.MonoGame._2D_Camera
         enum DirtyType : byte { Pos = 1, Angle = 2, Scale = 4 }
 
         /// <summary>Create a 2D camera</summary>
-        /// <param name="pos">2D vector position</param>
-        /// <param name="angle">Z rotation</param>
+        /// <param name="pos">Position</param>
+        /// <param name="angle">Z rotation (in radians)</param>
         /// <param name="scale">Scale/Zoom</param>
         /// <param name="virtualRes">Virtual resolution</param>
         public Camera(Vector2 pos, float angle, Vector2 scale, (int Width, int Height) virtualRes)
@@ -182,8 +182,8 @@ namespace Dcrew.MonoGame._2D_Camera
             _isDirty |= DirtyType.Angle;
         }
         /// <summary>Create a 2D camera</summary>
-        /// <param name="pos">2D vector position</param>
-        /// <param name="angle">Z rotation</param>
+        /// <param name="pos">Position</param>
+        /// <param name="angle">Z rotation (in radians)</param>
         /// <param name="scale">Scale/Zoom</param>
         public Camera(Vector2 pos, float angle, Vector2 scale) : this(pos, angle, scale, (0, 0)) { }
 
