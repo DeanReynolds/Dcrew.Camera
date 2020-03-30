@@ -186,6 +186,8 @@ namespace Dcrew.MonoGame._2D_Camera
         /// <param name="angle">Z rotation (in radians)</param>
         /// <param name="scale">Scale/Zoom</param>
         public Camera(Vector2 pos, float angle, Vector2 scale) : this(pos, angle, scale, (0, 0)) { }
+        /// <summary>Create a 2D camera</summary>
+        public Camera() : this(Vector2.Zero, 0, Vector2.One, (0, 0)) { }
 
         /// <summary>Converts screen coords to world coords</summary>
         public Vector2 ScreenToWorld(float x, float y)
