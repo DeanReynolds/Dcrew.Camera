@@ -187,6 +187,22 @@ namespace Dcrew.MonoGame._2D_Camera
         public Camera(Vector2 pos, float angle, Vector2 scale) : this(pos, angle, scale, (0, 0)) { }
         /// <summary>Create a 2D camera</summary>
         public Camera() : this(Vector2.Zero, 0, Vector2.One, (0, 0)) { }
+        /// <summary>Create a 2D camera</summary>
+        /// <param name="virtualRes">Virtual resolution</param>
+        public Camera((int Width, int Height) virtualRes) : this(Vector2.Zero, 0, Vector2.One, virtualRes) { }
+        /// <summary>Create a 2D camera</summary>
+        /// <param name="pos">Position</param>
+        /// <param name="angle">Z rotation (in radians)</param>
+        public Camera(Vector2 pos, float angle = 0) : this(pos, angle, Vector2.One, (0, 0)) { }
+        /// <summary>Create a 2D camera</summary>
+        /// <param name="pos">Position</param>
+        /// <param name="virtualRes">Virtual resolution</param>
+        public Camera(Vector2 pos, (int Width, int Height) virtualRes) : this(pos, 0, Vector2.One, virtualRes) { }
+        /// <summary>Create a 2D camera</summary>
+        /// <param name="pos">Position</param>
+        /// <param name="angle">Z rotation (in radians)</param>
+        /// <param name="virtualRes">Virtual resolution</param>
+        public Camera(Vector2 pos, float angle, (int Width, int Height) virtualRes) : this(pos, angle, Vector2.One, virtualRes) { }
 
         /// <summary>Re-adds <see cref="Game.GraphicsDevice"/> and <see cref="Game.Window"/> reset/size-changed events (used for keeping <see cref="Origin"/> updated)
         /// ONLY CALL THIS IF <see cref="Dispose"/> HAS BEEN CALLED BEFORE THIS</summary>
