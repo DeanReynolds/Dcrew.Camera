@@ -156,8 +156,7 @@ namespace Dcrew.MonoGame._2D_Camera
             _virtualRes = virtualRes;
             _hasVirtualRes = virtualRes.Width > 0 && virtualRes.Height > 0;
             UpdateViewportRes(_graphicsDevice.Viewport.Width, _graphicsDevice.Viewport.Height);
-            _graphicsDevice.DeviceReset += WindowSizeChanged;
-            _window.ClientSizeChanged += WindowSizeChanged;
+            Init();
             _scaleMatrix = _invertMatrix = _viewMatrix = new Matrix
             {
                 M33 = 1,
@@ -188,6 +187,21 @@ namespace Dcrew.MonoGame._2D_Camera
         public Camera(Vector2 pos, float angle, Vector2 scale) : this(pos, angle, scale, (0, 0)) { }
         /// <summary>Create a 2D camera</summary>
         public Camera() : this(Vector2.Zero, 0, Vector2.One, (0, 0)) { }
+
+        /// <summary>Re-adds <see cref="Game.GraphicsDevice"/> and <see cref="Game.Window"/> reset/size-changed events (used for keeping <see cref="Origin"/> updated)
+        /// ONLY CALL THIS IF <see cref="Dispose"/> HAS BEEN CALLED BEFORE THIS</summary>
+        public void Init()
+        {
+            _graphicsDevice.DeviceReset += WindowSizeChanged;
+            _window.ClientSizeChanged += WindowSizeChanged;
+        }
+        /// <summary>Removes <see cref="Game.GraphicsDevice"/> and <see cref="Game.Window"/> reset/size-changed events (used for keeping <see cref="Origin"/> updated)
+        /// IF/WHEN RE-USING THIS CAMERA CALL <see cref="Init"/></summary>
+        public void Dispose()
+        {
+            _window.ClientSizeChanged -= WindowSizeChanged;
+            _graphicsDevice.DeviceReset -= WindowSizeChanged;
+        }
 
         /// <summary>Converts screen coords to world coords</summary>
         public Vector2 ScreenToWorld(float x, float y)
@@ -222,13 +236,6 @@ namespace Dcrew.MonoGame._2D_Camera
             int mouseX = mouseState.Value.Position.X,
                 mouseY = mouseState.Value.Position.Y;
             _mousePosition = ScreenToWorld(mouseX, mouseY);
-        }
-
-        /// <summary>Removes <see cref="Game.GraphicsDevice"/> and <see cref="Game.Window"/> reset/size-changed events for keeping <see cref="Origin"/> updated</summary>
-        public void Dispose()
-        {
-            _window.ClientSizeChanged -= WindowSizeChanged;
-            _graphicsDevice.DeviceReset -= WindowSizeChanged;
         }
 
         void UpdatePos()
