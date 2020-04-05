@@ -113,9 +113,19 @@ namespace Dcrew.MonoGame._2D_Camera
                 if (_isDirty.HasFlag(DirtyType.Scale))
                 {
                     UpdateScale();
+                    UpdateBounds();
                     _isDirty &= ~DirtyType.Scale;
                 }
                 return _scaleMatrix;
+            }
+        }
+        /// <summary>A rectangle covering the view (in world coords). Accounts for <see cref="Angle"/> and <see cref="Scale"/></summary>
+        public Rectangle Bounds
+        {
+            get
+            {
+                UpdateDirtyView();
+                return _viewBounds;
             }
         }
 
@@ -139,6 +149,7 @@ namespace Dcrew.MonoGame._2D_Camera
         (int Width, int Height) _viewportRes,
             _virtualRes;
         bool _hasVirtualRes;
+        Rectangle _viewBounds;
 
         [Flags]
         enum DirtyType : byte { Pos = 1, Angle = 2, Scale = 4 }
@@ -291,6 +302,7 @@ namespace Dcrew.MonoGame._2D_Camera
         {
             VirtualScale = _hasVirtualRes ? MathF.Min((float)_viewportRes.Width / _virtualRes.Width, (float)_viewportRes.Height / _virtualRes.Height) : 1;
             Origin = new Vector2(_originMatrix.M41 = _origin.X / VirtualScale, _originMatrix.M42 = _origin.Y / VirtualScale);
+            UpdateBounds();
         }
         void UpdateViewportRes(int width, int height)
         {
@@ -311,8 +323,34 @@ namespace Dcrew.MonoGame._2D_Camera
                     UpdateScale();
                 else if (_isDirty.HasFlag(DirtyType.Pos))
                     UpdatePos();
+                UpdateBounds();
                 _isDirty = 0;
             }
+        }
+        void UpdateBounds()
+        {
+            float tOX = Origin.X * 2,
+                tOY = Origin.Y * 2,
+                w = MathF.Ceiling(tOX / _scale.X) + .5f,
+                h = MathF.Ceiling(tOY / _scale.Y) + .5f,
+                oX = w / 2,
+                oY = h / 2;
+            Vector2 RotatePoint(float x, float y)
+            {
+                x -= oX;
+                y -= oY;
+                return new Vector2(x * _rotCos - y * _rotSin, x * _rotSin + y * _rotCos);
+            }
+            Vector2 tL = RotatePoint(0, 0),
+                tR = RotatePoint(w, 0),
+                bR = RotatePoint(w, h),
+                bL = RotatePoint(0, h);
+            int minX = (int)MathF.Min(MathF.Min(tL.X, tR.X), MathF.Min(bR.X, bL.X)),
+                minY = (int)MathF.Min(MathF.Min(tL.Y, tR.Y), MathF.Min(bR.Y, bL.Y)),
+                maxX = (int)MathF.Ceiling(MathF.Max(MathF.Max(tL.X, tR.X), MathF.Max(bR.X, bL.X))),
+                maxY = (int)MathF.Ceiling(MathF.Max(MathF.Max(tL.Y, tR.Y), MathF.Max(bR.Y, bL.Y)));
+            _viewBounds = new Rectangle(minX, minY, maxX - minX, maxY - minY);
+            _viewBounds.Offset(_position);
         }
 
         void WindowSizeChanged(object sender, EventArgs e)
