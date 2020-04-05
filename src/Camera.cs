@@ -87,6 +87,8 @@ namespace Dcrew.MonoGame._2D_Camera
         }
         /// <summary>Origin/center-point (doesn't account for <see cref="Scale"/> or <see cref="Angle"/>)</summary>
         public Vector2 Origin { get; private set; }
+        /// <summary>Scale for <see cref="VirtualRes"/> in relation to the games' viewport res</summary>
+        public float VirtualScale { get; private set; }
 
         /// <summary>View/Transform matrix</summary>
         public Matrix View
@@ -116,8 +118,6 @@ namespace Dcrew.MonoGame._2D_Camera
                 return _scaleMatrix;
             }
         }
-        /// <summary>Scale for <see cref="VirtualRes"/> in relation to the games' viewport res</summary>
-        public float VirtualScale { get; private set; }
 
         /// <summary>Mouse/Cursor position, make sure to call <see cref="UpdateMousePos(MouseState?)"/> once per frame before using this</summary>
         public Vector2 MousePos => _mousePosition;
