@@ -128,13 +128,13 @@ namespace Dcrew.MonoGame._2D_Camera
             }
         }
 
-        /// <summary>Mouse/Cursor position, make sure to call <see cref="UpdateMousePos(MouseState?)"/> once per frame before using this</summary>
-        public Vector2 MousePos => _mousePosition;
+        /// <summary>Mouse/Cursor xyition, make sure to call <see cref="UpdateMouseXY(MouseState?)"/> once per frame before using this</summary>
+        public Vector2 MouseXY => _mouseXY;
 
         Vector2 _xy,
             _scale,
             _origin,
-            _mousePosition;
+            _mouseXY;
         float _angle,
             _rotCos,
             _rotSin,
@@ -256,12 +256,12 @@ namespace Dcrew.MonoGame._2D_Camera
 
         /// <summary>Call once per frame and before using <see cref="MousePos"/></summary>
         /// <param name="mouseState">Null value will auto grab latest state</param>
-        public void UpdateMousePos(MouseState? mouseState = null)
+        public void UpdateMouseXY(MouseState? mouseState = null)
         {
             mouseState ??= Mouse.GetState();
-            int mouseX = mouseState.Value.Position.X,
-                mouseY = mouseState.Value.Position.Y;
-            _mousePosition = ScreenToWorld(mouseX, mouseY);
+            int mouseX = mouseState.Value.position.X,
+                mouseY = mouseState.Value.position.Y;
+            _mouseXY = ScreenToWorld(mouseX, mouseY);
         }
 
         void UpdateXY()
