@@ -63,7 +63,7 @@ namespace Dcrew.MonoGame._2D_Camera
             }
         }
         /// <summary>Scale/Zoom</summary>
-        public Vector2 Zoom
+        public Vector2 Scale
         {
             get => _scale;
             set
@@ -84,7 +84,7 @@ namespace Dcrew.MonoGame._2D_Camera
                 _isDirty |= DirtyType.Scale;
             }
         }
-        /// <summary>Origin/center-point (doesn't account for <see cref="Zoom"/> or <see cref="Angle"/>)</summary>
+        /// <summary>Origin/center-point (doesn't account for <see cref="Scale"/> or <see cref="Angle"/>)</summary>
         public Vector2 Origin { get; private set; }
         /// <summary>Scale for <see cref="VirtualRes"/> in relation to the games' viewport res</summary>
         public float VirtualScale { get; private set; }
@@ -193,8 +193,8 @@ namespace Dcrew.MonoGame._2D_Camera
         /// <summary>Create a 2D camera</summary>
         /// <param name="xy">X/Y position</param>
         /// <param name="angle">Z rotation (in radians)</param>
-        /// <param name="zoom">Scale/Zoom</param>
-        public Camera(Vector2 xy, float angle, Vector2 zoom) : this(xy, angle, zoom, (0, 0)) { }
+        /// <param name="scale">Scale/Zoom</param>
+        public Camera(Vector2 xy, float angle, Vector2 scale) : this(xy, angle, scale, (0, 0)) { }
         /// <summary>Create a 2D camera</summary>
         public Camera() : this(Vector2.Zero, 0, Vector2.One, (0, 0)) { }
         /// <summary>Create a 2D camera</summary>
