@@ -26,21 +26,13 @@ namespace Dcrew.MonoGame._2D_Camera
         public float X
         {
             get => _xy.X;
-            set
-            {
-                _xy.X = value;
-                _isDirty |= DirtyType.XY;
-            }
+            set => _xy.X = value;
         }
         /// <summary>Y position</summary>
         public float Y
         {
             get => _xy.Y;
-            set
-            {
-                _xy.Y = value;
-                _isDirty |= DirtyType.XY;
-            }
+            set => _xy.Y = value;
         }
         /// <summary>X/Y position</summary>
         public Vector2 XY
@@ -49,8 +41,21 @@ namespace Dcrew.MonoGame._2D_Camera
             set
             {
                 _xy = value;
-                _isDirty |= DirtyType.XY;
+                _xyz.X = value.X;
+                _xyz.Y = value.Y;
             }
+        }
+        /// <summary>Z position</summary>
+        public float Z
+        {
+            get => _xyz.Z;
+            set => _xyz.Z = value;
+        }
+        /// <summary>X/Y/Z Position</summary>
+        public Vector3 XYZ
+        {
+            get => _xyz;
+            set => _xyz = value;
         }
         /// <summary>Z rotation (in radians)</summary>
         public float Angle
@@ -59,7 +64,7 @@ namespace Dcrew.MonoGame._2D_Camera
             set
             {
                 _angle = value;
-                _isDirty |= DirtyType.Angle;
+                _angleDirty = true;
             }
         }
         /// <summary>Scale/Zoom</summary>
@@ -69,7 +74,6 @@ namespace Dcrew.MonoGame._2D_Camera
             set
             {
                 _scale = value;
-                _isDirty |= DirtyType.Scale;
             }
         }
         /// <summary>Virtual resolution</summary>
@@ -81,7 +85,6 @@ namespace Dcrew.MonoGame._2D_Camera
                 _virtualRes = value;
                 _hasVirtualRes = value.Width > 0 && value.Height > 0;
                 UpdateOrigin();
-                _isDirty |= DirtyType.Scale;
             }
         }
         /// <summary>Origin/center-point (doesn't account for <see cref="Scale"/> or <see cref="Angle"/>)</summary>
@@ -89,45 +92,12 @@ namespace Dcrew.MonoGame._2D_Camera
         /// <summary>Scale for <see cref="VirtualRes"/> in relation to the games' viewport res</summary>
         public float VirtualScale { get; private set; }
 
-        /// <summary>View/Transform matrix</summary>
-        public Matrix View
-        {
-            get
-            {
-                UpdateDirtyView();
-                return _viewMatrix;
-            }
-        }
-        /// <summary>Invert of <see cref="View"/></summary>
-        public Matrix Invert => _invertMatrix;
         /// <summary>Projection matrix</summary>
         public Matrix Projection => _projectionMatrix;
         /// <summary>Matrix dedicated to <see cref="Origin"/></summary>
         public Matrix OriginMatrix => _originMatrix;
-        /// <summary>Matrix dedicated to <see cref="Zoom"/></summary>
-        public Matrix ScaleMatrix
-        {
-            get
-            {
-                if (_isDirty.HasFlag(DirtyType.Scale))
-                {
-                    UpdateScale();
-                    UpdateBounds();
-                    _isDirty &= ~DirtyType.Scale;
-                }
-                return _scaleMatrix;
-            }
-        }
-        /// <summary>A rectangle covering the view (in world coords). Accounts for <see cref="Angle"/> and <see cref="Zoom"/></summary>
-        public Rectangle Bounds
-        {
-            get
-            {
-                UpdateDirtyView();
-                return _viewBounds;
-            }
-        }
-
+        /// <summary>A rectangle covering the view (in world coords). Accounts for <see cref="Angle"/> and <see cref="Scale"/></summary>
+        public Rectangle Bounds => _viewBounds;
         /// <summary>Mouse/Cursor xyition, make sure to call <see cref="UpdateMouseXY(MouseState?)"/> once per frame before using this</summary>
         public Vector2 MouseXY => _mouseXY;
 
@@ -137,21 +107,15 @@ namespace Dcrew.MonoGame._2D_Camera
             _mouseXY;
         float _angle,
             _rotCos,
-            _rotSin,
-            _n27;
-        DirtyType _isDirty;
-        Matrix _viewMatrix,
-            _invertMatrix,
-            _projectionMatrix,
-            _originMatrix,
-            _scaleMatrix;
+            _rotSin;
+        Vector3 _xyz = new Vector3(0, 0, 1);
+        Matrix _projectionMatrix,
+            _originMatrix;
         (int Width, int Height) _viewportRes,
             _virtualRes;
-        bool _hasVirtualRes;
+        bool _hasVirtualRes,
+            _angleDirty;
         Rectangle _viewBounds;
-
-        [Flags]
-        enum DirtyType : byte { XY = 1, Angle = 2, Scale = 4 }
 
         /// <summary>Create a 2D camera</summary>
         /// <param name="xy">X/Y position</param>
@@ -161,17 +125,12 @@ namespace Dcrew.MonoGame._2D_Camera
         public Camera(Vector2 xy, float angle, Vector2 scale, (int Width, int Height) virtualRes)
         {
             _xy = xy;
-            _angle = angle;
+            Angle = angle;
             _scale = scale;
             _virtualRes = virtualRes;
             _hasVirtualRes = virtualRes.Width > 0 && virtualRes.Height > 0;
             UpdateViewportRes(_graphicsDevice.Viewport.Width, _graphicsDevice.Viewport.Height);
             Init();
-            _scaleMatrix = _invertMatrix = _viewMatrix = new Matrix
-            {
-                M33 = 1,
-                M44 = 1
-            };
             _originMatrix = new Matrix
             {
                 M11 = 1,
@@ -188,7 +147,6 @@ namespace Dcrew.MonoGame._2D_Camera
                 M42 = 1,
                 M44 = 1
             };
-            _isDirty |= DirtyType.Angle;
         }
         /// <summary>Create a 2D camera</summary>
         /// <param name="xy">X/Y position</param>
@@ -229,11 +187,70 @@ namespace Dcrew.MonoGame._2D_Camera
             _graphicsDevice.DeviceReset -= WindowSizeChanged;
         }
 
-        /// <summary>Converts screen coords to world coords</summary>
-        public Vector2 ScreenToWorld(float x, float y)
+        /// <summary>Returns true if sprites drawn using <see cref="View(float)"/> at Z <paramref name="z"/> should be visible/drawn</summary>
+        public bool IsVisible(float z)
         {
-            UpdateDirtyView();
-            return new Vector2(x * _invertMatrix.M11 + (y * _invertMatrix.M21) + _invertMatrix.M41, x * _invertMatrix.M12 + (y * _invertMatrix.M22) + _invertMatrix.M42);
+            var zoomFromZ = ScaleFromZ(Z, z);
+            return zoomFromZ > 0 && zoomFromZ < 10;
+        }
+        /// <summary>The scale matrix at Z <paramref name="z"/></summary>
+        public Matrix ScaleMatrix(float z = 0)
+        {
+            var matrix = new Matrix { M33 = 1, M44 = 1 };
+            var zoomFromZ = ScaleFromZ(Z, z);
+            matrix.M11 = _scale.X * VirtualScale * zoomFromZ;
+            matrix.M22 = _scale.Y * VirtualScale * zoomFromZ;
+            return matrix;
+        }
+        /// <summary>The view/transform matrix at Z <paramref name="z"/></summary>
+        public Matrix View(float z = 0)
+        {
+            UpdateDirtyAngle();
+            var matrix = new Matrix { M33 = 1, M44 = 1 };
+            float zoomFromZ = ScaleFromZ(Z, z),
+                scaleM11 = _scale.X * VirtualScale * zoomFromZ,
+                scaleM22 = _scale.Y * VirtualScale * zoomFromZ,
+                m41 = -_xy.X * scaleM11,
+                m42 = -_xy.Y * scaleM22;
+            matrix.M41 = (m41 * _rotCos) + (m42 * -_rotSin) + _origin.X;
+            matrix.M42 = (m41 * _rotSin) + (m42 * _rotCos) + _origin.Y;
+            matrix.M11 = scaleM11 * _rotCos;
+            matrix.M12 = scaleM22 * _rotSin;
+            matrix.M21 = scaleM11 * -_rotSin;
+            matrix.M22 = scaleM22 * _rotCos;
+            return matrix;
+        }
+        /// <summary>The inveart matrix of <see cref="View(float)"/> at Z <paramref name="z"/></summary>
+        public Matrix ViewInvert(float z = 0)
+        {
+            UpdateDirtyAngle();
+            var matrix = new Matrix { M33 = 1, M44 = 1 };
+            float zoomFromZ = ScaleFromZ(Z, z),
+                scaleM11 = _scale.X * VirtualScale * zoomFromZ,
+                scaleM22 = _scale.Y * VirtualScale * zoomFromZ,
+                m41 = -_xy.X * scaleM11,
+                m42 = -_xy.Y * scaleM22,
+                viewM11 = scaleM11 * _rotCos,
+                viewM12 = scaleM22 * _rotSin,
+                viewM21 = scaleM11 * -_rotSin,
+                viewM22 = scaleM22 * _rotCos,
+                num19 = -((m41 * _rotSin) + (m42 * _rotCos) + _origin.Y),
+                num21 = -((m41 * _rotCos) + (m42 * -_rotSin) + _origin.X),
+                n24 = -viewM21,
+                n27 = (float)(1 / (viewM11 * (double)viewM22 + viewM12 * (double)n24));
+            matrix.M41 = (float)-(viewM21 * (double)num19 - viewM22 * (double)num21) * n27;
+            matrix.M42 = (float)(viewM11 * (double)num19 - viewM12 * (double)num21) * n27;
+            matrix.M11 = viewM22 * n27;
+            matrix.M12 = -viewM12 * n27;
+            matrix.M21 = n24 * n27;
+            matrix.M22 = viewM11 * n27;
+            return matrix;
+        }
+        /// <summary>Converts screen coords to world coords</summary>
+        public Vector2 ScreenToWorld(float x, float y, float z = 0)
+        {
+            var invert = ViewInvert(z);
+            return new Vector2(x * invert.M11 + (y * invert.M21) + invert.M41, x * invert.M12 + (y * invert.M22) + invert.M42);
         }
         /// <summary>Converts screen coords to world coords</summary>
         public Vector2 ScreenToWorld(Vector2 xy) => ScreenToWorld(xy.X, xy.Y);
@@ -242,10 +259,10 @@ namespace Dcrew.MonoGame._2D_Camera
         /// <summary>Returns the scale of the world in relation to the screen</summary>
         public float ScreenToWorldScale() => 1 / Vector2.Distance(ScreenToWorld(0, 0), ScreenToWorld(1, 0));
         /// <summary>Converts world coords to screen coords</summary>
-        public Vector2 WorldToScreen(float x, float y)
+        public Vector2 WorldToScreen(float x, float y, float z = 0)
         {
-            UpdateDirtyView();
-            return new Vector2(x * _viewMatrix.M11 + (y * _viewMatrix.M21) + _viewMatrix.M41 + x, x * _viewMatrix.M12 + (y * _viewMatrix.M22) + _viewMatrix.M42 + y);
+            var view = View(z);
+            return new Vector2(x * view.M11 + (y * view.M21) + view.M41 + x, x * view.M12 + (y * view.M22) + view.M42 + y);
         }
         /// <summary>Converts world coords to screen coords</summary>
         public Vector2 WorldToScreen(Vector2 xy) => WorldToScreen(xy.X, xy.Y);
@@ -253,6 +270,11 @@ namespace Dcrew.MonoGame._2D_Camera
         public Point WorldToScreen(Point xy) => WorldToScreen(xy.X, xy.Y).ToPoint();
         /// <summary>Returns the scale of the screen in relation to the world</summary>
         public float WorldToScreenScale() => Vector2.Distance(WorldToScreen(0, 0), WorldToScreen(1, 0));
+
+        /// <summary>The scale of <see cref="View(float)"/> at Z <paramref name="targetZ"/> from <paramref name="z"/></summary>
+        public float ScaleFromZ(float z, float targetZ) => z - targetZ == 0 ? 0 : 1 / (z - targetZ);
+        /// <summary>The camera Z required for sprites at Z <paramref name="targetZ"/> that should be drawn at scale <paramref name="zoom"/></summary>
+        public float ZFromScale(float zoom, float targetZ) => 1 / zoom + targetZ;
 
         /// <summary>Call once per frame and before using <see cref="MouseXY"/></summary>
         /// <param name="mouseState">Null value will auto grab latest state</param>
@@ -264,38 +286,14 @@ namespace Dcrew.MonoGame._2D_Camera
             _mouseXY = ScreenToWorld(mouseX, mouseY);
         }
 
-        void UpdateXY()
+        void UpdateDirtyAngle()
         {
-            float m41 = -_xy.X * _scaleMatrix.M11,
-                m42 = -_xy.Y * _scaleMatrix.M22;
-            _viewMatrix.M41 = (m41 * _rotCos) + (m42 * -_rotSin) + _origin.X;
-            _viewMatrix.M42 = (m41 * _rotSin) + (m42 * _rotCos) + _origin.Y;
-            float num19 = -_viewMatrix.M42;
-            float num21 = -_viewMatrix.M41;
-            _invertMatrix.M41 = (float)-(_viewMatrix.M21 * (double)num19 - _viewMatrix.M22 * (double)num21) * _n27;
-            _invertMatrix.M42 = (float)(_viewMatrix.M11 * (double)num19 - _viewMatrix.M12 * (double)num21) * _n27;
-        }
-        void UpdateScale()
-        {
-            _scaleMatrix.M11 = _scale.X * VirtualScale;
-            _scaleMatrix.M22 = _scale.Y * VirtualScale;
-            _viewMatrix.M11 = _scaleMatrix.M11 * _rotCos;
-            _viewMatrix.M12 = _scaleMatrix.M22 * _rotSin;
-            _viewMatrix.M21 = _scaleMatrix.M11 * -_rotSin;
-            _viewMatrix.M22 = _scaleMatrix.M22 * _rotCos;
-            float n24 = -_viewMatrix.M21;
-            _n27 = (float)(1 / (_viewMatrix.M11 * (double)_viewMatrix.M22 + _viewMatrix.M12 * (double)n24));
-            _invertMatrix.M11 = _viewMatrix.M22 * _n27;
-            _invertMatrix.M12 = -_viewMatrix.M12 * _n27;
-            _invertMatrix.M21 = n24 * _n27;
-            _invertMatrix.M22 = _viewMatrix.M11 * _n27;
-            UpdateXY();
-        }
-        void UpdateAngle()
-        {
-            _rotCos = MathF.Cos(-_angle);
-            _rotSin = MathF.Sin(-_angle);
-            UpdateScale();
+            if (_angleDirty)
+            {
+                _rotCos = MathF.Cos(-Angle);
+                _rotSin = MathF.Sin(-Angle);
+                _angleDirty = false;
+            }
         }
         void UpdateOrigin()
         {
@@ -308,23 +306,8 @@ namespace Dcrew.MonoGame._2D_Camera
             _viewportRes = (width, height);
             _origin = new Vector2(width / 2f, height / 2f);
             UpdateOrigin();
-            _isDirty |= DirtyType.Scale;
             _projectionMatrix.M11 = (float)(2d / _viewportRes.Width);
             _projectionMatrix.M22 = (float)(2d / -_viewportRes.Height);
-        }
-        void UpdateDirtyView()
-        {
-            if (_isDirty != 0)
-            {
-                if (_isDirty.HasFlag(DirtyType.Angle))
-                    UpdateAngle();
-                else if (_isDirty.HasFlag(DirtyType.Scale))
-                    UpdateScale();
-                else if (_isDirty.HasFlag(DirtyType.XY))
-                    UpdateXY();
-                UpdateBounds();
-                _isDirty = 0;
-            }
         }
         void UpdateBounds()
         {
