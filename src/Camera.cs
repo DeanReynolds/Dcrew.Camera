@@ -254,7 +254,7 @@ namespace Dcrew.MonoGame._2D_Camera
         /// <summary>Returns the scale of the screen in relation to the world</summary>
         public float WorldToScreenScale() => Vector2.Distance(WorldToScreen(0, 0), WorldToScreen(1, 0));
 
-        /// <summary>Call once per frame and before using <see cref="MousePos"/></summary>
+        /// <summary>Call once per frame and before using <see cref="MouseXY"/></summary>
         /// <param name="mouseState">Null value will auto grab latest state</param>
         public void UpdateMouseXY(MouseState? mouseState = null)
         {
