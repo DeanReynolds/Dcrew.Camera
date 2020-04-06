@@ -259,8 +259,8 @@ namespace Dcrew.MonoGame._2D_Camera
         public void UpdateMouseXY(MouseState? mouseState = null)
         {
             mouseState ??= Mouse.GetState();
-            int mouseX = mouseState.Value.position.X,
-                mouseY = mouseState.Value.position.Y;
+            int mouseX = mouseState.Value.Position.X,
+                mouseY = mouseState.Value.Position.Y;
             _mouseXY = ScreenToWorld(mouseX, mouseY);
         }
 
