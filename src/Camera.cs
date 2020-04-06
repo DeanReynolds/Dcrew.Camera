@@ -25,32 +25,31 @@ namespace Dcrew.MonoGame._2D_Camera
         /// <summary>X position</summary>
         public float X
         {
-            get => _position.X;
+            get => _xy.X;
             set
             {
-                _position.X = value;
-                _isDirty |= DirtyType.Pos;
+                _xy.X = value;
+                _isDirty |= DirtyType.XY;
             }
         }
         /// <summary>Y position</summary>
         public float Y
         {
-            get => _position.Y;
+            get => _xy.Y;
             set
             {
-                _position.Y = value;
-                _isDirty |= DirtyType.Pos;
+                _xy.Y = value;
+                _isDirty |= DirtyType.XY;
             }
         }
-        /// <summary>Position</summary>
-        public Vector2 Pos
+        /// <summary>X/Y position</summary>
+        public Vector2 XY
         {
-            get => _position;
+            get => _xy;
             set
             {
-                _position.X = value.X;
-                _position.Y = value.Y;
-                _isDirty |= DirtyType.Pos;
+                _xy = value;
+                _isDirty |= DirtyType.XY;
             }
         }
         /// <summary>Z rotation (in radians)</summary>
@@ -132,7 +131,7 @@ namespace Dcrew.MonoGame._2D_Camera
         /// <summary>Mouse/Cursor position, make sure to call <see cref="UpdateMousePos(MouseState?)"/> once per frame before using this</summary>
         public Vector2 MousePos => _mousePosition;
 
-        Vector2 _position,
+        Vector2 _xy,
             _scale,
             _origin,
             _mousePosition;
@@ -152,16 +151,16 @@ namespace Dcrew.MonoGame._2D_Camera
         Rectangle _viewBounds;
 
         [Flags]
-        enum DirtyType : byte { Pos = 1, Angle = 2, Scale = 4 }
+        enum DirtyType : byte { XY = 1, Angle = 2, Scale = 4 }
 
         /// <summary>Create a 2D camera</summary>
-        /// <param name="pos">Position</param>
+        /// <param name="xy">X/Y position</param>
         /// <param name="angle">Z rotation (in radians)</param>
         /// <param name="scale">Scale/Zoom</param>
         /// <param name="virtualRes">Virtual resolution</param>
-        public Camera(Vector2 pos, float angle, Vector2 scale, (int Width, int Height) virtualRes)
+        public Camera(Vector2 xy, float angle, Vector2 scale, (int Width, int Height) virtualRes)
         {
-            _position = pos;
+            _xy = xy;
             _angle = angle;
             _scale = scale;
             _virtualRes = virtualRes;
@@ -192,28 +191,28 @@ namespace Dcrew.MonoGame._2D_Camera
             _isDirty |= DirtyType.Angle;
         }
         /// <summary>Create a 2D camera</summary>
-        /// <param name="pos">Position</param>
+        /// <param name="xy">X/Y position</param>
         /// <param name="angle">Z rotation (in radians)</param>
         /// <param name="scale">Scale/Zoom</param>
-        public Camera(Vector2 pos, float angle, Vector2 scale) : this(pos, angle, scale, (0, 0)) { }
+        public Camera(Vector2 xy, float angle, Vector2 scale) : this(xy, angle, scale, (0, 0)) { }
         /// <summary>Create a 2D camera</summary>
         public Camera() : this(Vector2.Zero, 0, Vector2.One, (0, 0)) { }
         /// <summary>Create a 2D camera</summary>
         /// <param name="virtualRes">Virtual resolution</param>
         public Camera((int Width, int Height) virtualRes) : this(Vector2.Zero, 0, Vector2.One, virtualRes) { }
         /// <summary>Create a 2D camera</summary>
-        /// <param name="pos">Position</param>
+        /// <param name="xy">X/Y position</param>
         /// <param name="angle">Z rotation (in radians)</param>
-        public Camera(Vector2 pos, float angle = 0) : this(pos, angle, Vector2.One, (0, 0)) { }
+        public Camera(Vector2 xy, float angle = 0) : this(xy, angle, Vector2.One, (0, 0)) { }
         /// <summary>Create a 2D camera</summary>
-        /// <param name="pos">Position</param>
+        /// <param name="xy">X/Y position</param>
         /// <param name="virtualRes">Virtual resolution</param>
-        public Camera(Vector2 pos, (int Width, int Height) virtualRes) : this(pos, 0, Vector2.One, virtualRes) { }
+        public Camera(Vector2 xy, (int Width, int Height) virtualRes) : this(xy, 0, Vector2.One, virtualRes) { }
         /// <summary>Create a 2D camera</summary>
-        /// <param name="pos">Position</param>
+        /// <param name="xy">X/Y position</param>
         /// <param name="angle">Z rotation (in radians)</param>
         /// <param name="virtualRes">Virtual resolution</param>
-        public Camera(Vector2 pos, float angle, (int Width, int Height) virtualRes) : this(pos, angle, Vector2.One, virtualRes) { }
+        public Camera(Vector2 xy, float angle, (int Width, int Height) virtualRes) : this(xy, angle, Vector2.One, virtualRes) { }
 
         /// <summary>Re-adds <see cref="Game.GraphicsDevice"/> and <see cref="Game.Window"/> reset/size-changed events (used for keeping <see cref="Origin"/> updated)
         /// ONLY CALL THIS IF <see cref="Dispose"/> HAS BEEN CALLED BEFORE THIS</summary>
@@ -237,9 +236,9 @@ namespace Dcrew.MonoGame._2D_Camera
             return new Vector2(x * _invertMatrix.M11 + (y * _invertMatrix.M21) + _invertMatrix.M41, x * _invertMatrix.M12 + (y * _invertMatrix.M22) + _invertMatrix.M42);
         }
         /// <summary>Converts screen coords to world coords</summary>
-        public Vector2 ScreenToWorld(Vector2 pos) => ScreenToWorld(pos.X, pos.Y);
+        public Vector2 ScreenToWorld(Vector2 xy) => ScreenToWorld(xy.X, xy.Y);
         /// <summary>Converts screen coords to world coords</summary>
-        public Point ScreenToWorld(Point pos) => ScreenToWorld(pos.X, pos.Y).ToPoint();
+        public Point ScreenToWorld(Point xy) => ScreenToWorld(xy.X, xy.Y).ToPoint();
         /// <summary>Returns the scale of the world in relation to the screen</summary>
         public float ScreenToWorldScale() => 1 / Vector2.Distance(ScreenToWorld(0, 0), ScreenToWorld(1, 0));
         /// <summary>Converts world coords to screen coords</summary>
@@ -249,9 +248,9 @@ namespace Dcrew.MonoGame._2D_Camera
             return new Vector2(x * _viewMatrix.M11 + (y * _viewMatrix.M21) + _viewMatrix.M41 + x, x * _viewMatrix.M12 + (y * _viewMatrix.M22) + _viewMatrix.M42 + y);
         }
         /// <summary>Converts world coords to screen coords</summary>
-        public Vector2 WorldToScreen(Vector2 pos) => WorldToScreen(pos.X, pos.Y);
+        public Vector2 WorldToScreen(Vector2 xy) => WorldToScreen(xy.X, xy.Y);
         /// <summary>Converts world coords to screen coords</summary>
-        public Point WorldToScreen(Point pos) => WorldToScreen(pos.X, pos.Y).ToPoint();
+        public Point WorldToScreen(Point xy) => WorldToScreen(xy.X, xy.Y).ToPoint();
         /// <summary>Returns the scale of the screen in relation to the world</summary>
         public float WorldToScreenScale() => Vector2.Distance(WorldToScreen(0, 0), WorldToScreen(1, 0));
 
@@ -265,10 +264,10 @@ namespace Dcrew.MonoGame._2D_Camera
             _mousePosition = ScreenToWorld(mouseX, mouseY);
         }
 
-        void UpdatePos()
+        void UpdateXY()
         {
-            float m41 = -_position.X * _scaleMatrix.M11,
-                m42 = -_position.Y * _scaleMatrix.M22;
+            float m41 = -_xy.X * _scaleMatrix.M11,
+                m42 = -_xy.Y * _scaleMatrix.M22;
             _viewMatrix.M41 = (m41 * _rotCos) + (m42 * -_rotSin) + _origin.X;
             _viewMatrix.M42 = (m41 * _rotSin) + (m42 * _rotCos) + _origin.Y;
             float num19 = -_viewMatrix.M42;
@@ -290,7 +289,7 @@ namespace Dcrew.MonoGame._2D_Camera
             _invertMatrix.M12 = -_viewMatrix.M12 * _n27;
             _invertMatrix.M21 = n24 * _n27;
             _invertMatrix.M22 = _viewMatrix.M11 * _n27;
-            UpdatePos();
+            UpdateXY();
         }
         void UpdateAngle()
         {
@@ -321,8 +320,8 @@ namespace Dcrew.MonoGame._2D_Camera
                     UpdateAngle();
                 else if (_isDirty.HasFlag(DirtyType.Scale))
                     UpdateScale();
-                else if (_isDirty.HasFlag(DirtyType.Pos))
-                    UpdatePos();
+                else if (_isDirty.HasFlag(DirtyType.XY))
+                    UpdateXY();
                 UpdateBounds();
                 _isDirty = 0;
             }
@@ -350,7 +349,7 @@ namespace Dcrew.MonoGame._2D_Camera
                 maxX = (int)MathF.Ceiling(MathF.Max(MathF.Max(tL.X, tR.X), MathF.Max(bR.X, bL.X))),
                 maxY = (int)MathF.Ceiling(MathF.Max(MathF.Max(tL.Y, tR.Y), MathF.Max(bR.Y, bL.Y)));
             _viewBounds = new Rectangle(minX, minY, maxX - minX, maxY - minY);
-            _viewBounds.Offset(_position);
+            _viewBounds.Offset(_xy);
         }
 
         void WindowSizeChanged(object sender, EventArgs e)
