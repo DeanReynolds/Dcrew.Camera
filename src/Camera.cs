@@ -98,11 +98,11 @@ namespace Dcrew.MonoGame._2D_Camera
         public Matrix OriginMatrix => _originMatrix;
         /// <summary>A rectangle covering the view (in world coords). Accounts for <see cref="Angle"/> and <see cref="Scale"/></summary>
         public Rectangle Bounds => _viewBounds;
-        /// <summary>Mouse/Cursor xyition, make sure to call <see cref="UpdateMouseXY(MouseState?)"/> once per frame before using this</summary>
+        /// <summary>Mouse/Cursor world X/Y position, make sure to call <see cref="UpdateMouseXY(MouseState?)"/> once per frame before using this</summary>
         public Vector2 MouseXY => _mouseXY;
-        /// <summary>Mouse/Cursor xyition, make sure to call <see cref="UpdateMouseXY(MouseState?)"/> once per frame before using this</summary>
+        /// <summary>Mouse/Cursor world X position, make sure to call <see cref="UpdateMouseXY(MouseState?)"/> once per frame before using this</summary>
         public float MouseX => _mouseXY.X;
-        /// <summary>Mouse/Cursor xyition, make sure to call <see cref="UpdateMouseXY(MouseState?)"/> once per frame before using this</summary>
+        /// <summary>Mouse/Cursor world Y position, make sure to call <see cref="UpdateMouseXY(MouseState?)"/> once per frame before using this</summary>
         public float MouseY => _mouseXY.Y;
 
         Vector2 _xy,
@@ -284,8 +284,8 @@ namespace Dcrew.MonoGame._2D_Camera
         /// <summary>The camera Z required for sprites at Z <paramref name="targetZ"/> that should be drawn at scale <paramref name="zoom"/></summary>
         public float ZFromScale(float zoom, float targetZ) => 1 / zoom + targetZ;
 
-        /// <summary>Call once per frame and before using <see cref="MouseXY"/></summary>
-        /// <param name="mouseState">Null value will auto grab latest state</param>
+        /// <summary>Will update <see cref="MouseXY"/>. Call once per frame and before using <see cref="MouseXY"/></summary>
+        /// <param name="mouseState">null value will auto grab latest state</param>
         public void UpdateMouseXY(MouseState? mouseState = null)
         {
             mouseState ??= Mouse.GetState();
