@@ -18,3 +18,8 @@
 - [WorldToScreen](https://github.com/DeanReynolds/Dcrew.MonoGame.2D-Camera/blob/master/src/Camera.cs#L276)(Vector3 xyz) - Converts world coords to screen coords
 - [WorldToScreen](https://github.com/DeanReynolds/Dcrew.MonoGame.2D-Camera/blob/master/src/Camera.cs#L278)(Point xy, float z = 0) - Converts world coords to screen coords
 - [WorldToScreenScale](https://github.com/DeanReynolds/Dcrew.MonoGame.2D-Camera/blob/master/src/Camera.cs#L280)(float z = 0) - Returns the scale of the screen in relation to the world at Z z
+- [UpdateMouseXY](https://github.com/DeanReynolds/Dcrew.MonoGame.2D-Camera/blob/master/src/Camera.cs#L289)(MouseState? mouseState = null) - Will update Camera.[MouseXY](https://github.com/DeanReynolds/Dcrew.MonoGame.2D-Camera/blob/master/src/Camera.cs#L102). Call once per frame and before using Camera.[MouseXY](https://github.com/DeanReynolds/Dcrew.MonoGame.2D-Camera/blob/master/src/Camera.cs#L102)
+  - null value will auto grab latest state
+- [MouseXY](https://github.com/DeanReynolds/Dcrew.MonoGame.2D-Camera/blob/master/src/Camera.cs#L102) - 
+  - [MouseX](https://github.com/DeanReynolds/Dcrew.MonoGame.2D-Camera/blob/master/src/Camera.cs#L104) - will return [MouseXY](https://github.com/DeanReynolds/Dcrew.MonoGame.2D-Camera/blob/master/src/Camera.cs#L102).X
+  - [MouseY](https://github.com/DeanReynolds/Dcrew.MonoGame.2D-Camera/blob/master/src/Camera.cs#L106) - will return [MouseXY](https://github.com/DeanReynolds/Dcrew.MonoGame.2D-Camera/blob/master/src/Camera.cs#L102).Y
