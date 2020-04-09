@@ -100,6 +100,10 @@ namespace Dcrew.MonoGame._2D_Camera
         public Rectangle Bounds => _viewBounds;
         /// <summary>Mouse/Cursor xyition, make sure to call <see cref="UpdateMouseXY(MouseState?)"/> once per frame before using this</summary>
         public Vector2 MouseXY => _mouseXY;
+        /// <summary>Mouse/Cursor xyition, make sure to call <see cref="UpdateMouseXY(MouseState?)"/> once per frame before using this</summary>
+        public float MouseX => _mouseXY.X;
+        /// <summary>Mouse/Cursor xyition, make sure to call <see cref="UpdateMouseXY(MouseState?)"/> once per frame before using this</summary>
+        public float MouseY => _mouseXY.Y;
 
         Vector2 _xy,
             _scale,
