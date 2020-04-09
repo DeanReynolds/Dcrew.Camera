@@ -9,8 +9,12 @@
 - Parallax system (Z coord, optional), ground (usual 2D gameplay level) is at Z 0 and the camera is at 1
   - e.g. if you wanted to draw a sprite(s) behind and half the size & position of ground, you'd use [Camera.View](https://github.com/DeanReynolds/Dcrew.MonoGame.2D-Camera/blob/master/src/Camera.cs#L206)(-0.5f) as the transformMatrix in SpriteBatch.Begin() and you would draw this before drawing the ground using [Camera.View](https://github.com/DeanReynolds/Dcrew.MonoGame.2D-Camera/blob/master/src/Camera.cs#L206)()
 - [ScreenToWorld](https://github.com/DeanReynolds/Dcrew.MonoGame.2D-Camera/blob/master/src/Camera.cs#L250)(float x, float y, float z = 0) - Converts screen coords to world coords
-- [ScreenToWorld](https://github.com/DeanReynolds/Dcrew.MonoGame.2D-Camera/blob/master/src/Camera.cs#L256)(Vector2 xy) - Converts screen coords to world coords
-- [ScreenToWorld](https://github.com/DeanReynolds/Dcrew.MonoGame.2D-Camera/blob/master/src/Camera.cs#L258)(Point xy) - Converts screen coords to world coords
-- [WorldToScreen](https://github.com/DeanReynolds/Dcrew.MonoGame.2D-Camera/blob/master/src/Camera.cs#L262)(float x, float y, float z = 0) - Converts world coords to screen coords
-- [WorldToScreen](https://github.com/DeanReynolds/Dcrew.MonoGame.2D-Camera/blob/master/src/Camera.cs#L268)(Vector2 xy) - Converts world coords to screen coords
-- [WorldToScreen](https://github.com/DeanReynolds/Dcrew.MonoGame.2D-Camera/blob/master/src/Camera.cs#L270)(Point xy) - Converts world coords to screen coords
+- [ScreenToWorld](https://github.com/DeanReynolds/Dcrew.MonoGame.2D-Camera/blob/master/src/Camera.cs#L260)(Vector2 xy, float z = 0) - Converts screen coords to world coords
+- [ScreenToWorld](https://github.com/DeanReynolds/Dcrew.MonoGame.2D-Camera/blob/master/src/Camera.cs#L262)(Vector3 xyz) - Converts screen coords to world coords
+- [ScreenToWorld](https://github.com/DeanReynolds/Dcrew.MonoGame.2D-Camera/blob/master/src/Camera.cs#L264)(Point xy) - Converts screen coords to world coords
+- [ScreenToWorldScale](https://github.com/DeanReynolds/Dcrew.MonoGame.2D-Camera/blob/master/src/Camera.cs#L266)(float z = 0) - Returns the scale of the world at Z z in relation to the screen
+- [WorldToScreen](https://github.com/DeanReynolds/Dcrew.MonoGame.2D-Camera/blob/master/src/Camera.cs#L268)(float x, float y, float z = 0) - Converts world coords to screen coords
+- [WorldToScreen](https://github.com/DeanReynolds/Dcrew.MonoGame.2D-Camera/blob/master/src/Camera.cs#L274)(Vector2 xy, float z = 0) - Converts world coords to screen coords
+- [WorldToScreen](https://github.com/DeanReynolds/Dcrew.MonoGame.2D-Camera/blob/master/src/Camera.cs#L276)(Vector3 xyz) - Converts world coords to screen coords
+- [WorldToScreen](https://github.com/DeanReynolds/Dcrew.MonoGame.2D-Camera/blob/master/src/Camera.cs#L278)(Point xy, float z = 0) - Converts world coords to screen coords
+- [WorldToScreenScale](https://github.com/DeanReynolds/Dcrew.MonoGame.2D-Camera/blob/master/src/Camera.cs#L280)(float z = 0) - Returns the scale of the screen in relation to the world at Z z
