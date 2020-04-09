@@ -257,9 +257,11 @@ namespace Dcrew.MonoGame._2D_Camera
             return new Vector2(x * invert.M11 + (y * invert.M21) + invert.M41, x * invert.M12 + (y * invert.M22) + invert.M42);
         }
         /// <summary>Converts screen coords to world coords</summary>
-        public Vector2 ScreenToWorld(Vector2 xy) => ScreenToWorld(xy.X, xy.Y);
+        public Vector2 ScreenToWorld(Vector2 xy, float z = 0) => ScreenToWorld(xy.X, xy.Y, z);
         /// <summary>Converts screen coords to world coords</summary>
-        public Point ScreenToWorld(Point xy) => ScreenToWorld(xy.X, xy.Y).ToPoint();
+        public Vector2 ScreenToWorld(Vector3 xyz) => ScreenToWorld(xyz.X, xyz.Y, xyz.Z);
+        /// <summary>Converts screen coords to world coords</summary>
+        public Point ScreenToWorld(Point xy, float z = 0) => ScreenToWorld(xy.X, xy.Y, z).ToPoint();
         /// <summary>Returns the scale of the world in relation to the screen</summary>
         public float ScreenToWorldScale() => 1 / Vector2.Distance(ScreenToWorld(0, 0), ScreenToWorld(1, 0));
         /// <summary>Converts world coords to screen coords</summary>
@@ -269,9 +271,11 @@ namespace Dcrew.MonoGame._2D_Camera
             return new Vector2(x * view.M11 + (y * view.M21) + view.M41 + x, x * view.M12 + (y * view.M22) + view.M42 + y);
         }
         /// <summary>Converts world coords to screen coords</summary>
-        public Vector2 WorldToScreen(Vector2 xy) => WorldToScreen(xy.X, xy.Y);
+        public Vector2 WorldToScreen(Vector2 xy, float z = 0) => WorldToScreen(xy.X, xy.Y, z);
         /// <summary>Converts world coords to screen coords</summary>
-        public Point WorldToScreen(Point xy) => WorldToScreen(xy.X, xy.Y).ToPoint();
+        public Vector2 WorldToScreen(Vector3 xyz) => WorldToScreen(xyz.X, xyz.Y, xyz.Z);
+        /// <summary>Converts world coords to screen coords</summary>
+        public Point WorldToScreen(Point xy, float z = 0) => WorldToScreen(xy.X, xy.Y, z).ToPoint();
         /// <summary>Returns the scale of the screen in relation to the world</summary>
         public float WorldToScreenScale() => Vector2.Distance(WorldToScreen(0, 0), WorldToScreen(1, 0));
 
