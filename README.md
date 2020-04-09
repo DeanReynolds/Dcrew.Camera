@@ -21,5 +21,5 @@
 - [UpdateMouseXY](https://github.com/DeanReynolds/Dcrew.MonoGame.2D-Camera/blob/master/src/Camera.cs#L289)(MouseState? mouseState = null) - Will update Camera.[MouseXY](https://github.com/DeanReynolds/Dcrew.MonoGame.2D-Camera/blob/master/src/Camera.cs#L102). Call once per frame and before using Camera.[MouseXY](https://github.com/DeanReynolds/Dcrew.MonoGame.2D-Camera/blob/master/src/Camera.cs#L102)
   - null value will auto grab latest state
 - [MouseXY](https://github.com/DeanReynolds/Dcrew.MonoGame.2D-Camera/blob/master/src/Camera.cs#L102) - 
-  - [MouseX](https://github.com/DeanReynolds/Dcrew.MonoGame.2D-Camera/blob/master/src/Camera.cs#L104) - will return [MouseXY](https://github.com/DeanReynolds/Dcrew.MonoGame.2D-Camera/blob/master/src/Camera.cs#L102).X
-  - [MouseY](https://github.com/DeanReynolds/Dcrew.MonoGame.2D-Camera/blob/master/src/Camera.cs#L106) - will return [MouseXY](https://github.com/DeanReynolds/Dcrew.MonoGame.2D-Camera/blob/master/src/Camera.cs#L102).Y
+  - Camera.[MouseX](https://github.com/DeanReynolds/Dcrew.MonoGame.2D-Camera/blob/master/src/Camera.cs#L104) - will return [MouseXY](https://github.com/DeanReynolds/Dcrew.MonoGame.2D-Camera/blob/master/src/Camera.cs#L102).X
+  - Camera.[MouseY](https://github.com/DeanReynolds/Dcrew.MonoGame.2D-Camera/blob/master/src/Camera.cs#L106) - will return [MouseXY](https://github.com/DeanReynolds/Dcrew.MonoGame.2D-Camera/blob/master/src/Camera.cs#L102).Y
