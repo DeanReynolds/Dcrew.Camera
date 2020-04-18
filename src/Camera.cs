@@ -328,28 +328,56 @@ namespace Dcrew.MonoGame._2D_Camera
         }
         void UpdateBounds()
         {
-            float tOX = Origin.X * 2,
-                tOY = Origin.Y * 2,
-                w = MathF.Ceiling(tOX / _scale.X) + .5f,
-                h = MathF.Ceiling(tOY / _scale.Y) + .5f,
-                oX = w / 2,
-                oY = h / 2;
-            Vector2 RotatePoint(float x, float y)
-            {
-                x -= oX;
-                y -= oY;
-                return new Vector2(x * _rotCos - y * _rotSin, x * _rotSin + y * _rotCos);
-            }
-            Vector2 tL = RotatePoint(0, 0),
-                tR = RotatePoint(w, 0),
-                bR = RotatePoint(w, h),
-                bL = RotatePoint(0, h);
-            int minX = (int)MathF.Min(MathF.Min(tL.X, tR.X), MathF.Min(bR.X, bL.X)),
-                minY = (int)MathF.Min(MathF.Min(tL.Y, tR.Y), MathF.Min(bR.Y, bL.Y)),
-                maxX = (int)MathF.Ceiling(MathF.Max(MathF.Max(tL.X, tR.X), MathF.Max(bR.X, bL.X))),
-                maxY = (int)MathF.Ceiling(MathF.Max(MathF.Max(tL.Y, tR.Y), MathF.Max(bR.Y, bL.Y)));
-            _viewBounds = new Rectangle(minX, minY, maxX - minX, maxY - minY);
-            _viewBounds.Offset(_xy);
+            float x = -Origin.X,
+                y = -Origin.Y,
+                w = MathF.Ceiling(Origin.X / _scale.X) + .5f,
+                h = MathF.Ceiling(Origin.Y / _scale.Y) + .5f,
+                xcos = x * _rotCos,
+                ycos = y * _rotCos,
+                xsin = x * _rotSin,
+                ysin = y * _rotSin,
+                wcos = w * _rotCos,
+                wsin = w * _rotSin,
+                hcos = h * _rotCos,
+                hsin = h * _rotSin,
+                tlx = xcos - ysin,
+                tly = xsin + ycos,
+                trx = wcos - ysin,
+                tr_y = wsin + ycos,
+                brx = wcos - hsin,
+                bry = wsin + hcos,
+                blx = xcos - hsin,
+                bly = xsin + hcos,
+                minx = tlx,
+                miny = tly,
+                maxx = minx,
+                maxy = miny;
+            if (trx < minx)
+                minx = trx;
+            if (brx < minx)
+                minx = brx;
+            if (blx < minx)
+                minx = blx;
+            if (tr_y < miny)
+                miny = tr_y;
+            if (bry < miny)
+                miny = bry;
+            if (bly < miny)
+                miny = bly;
+            if (trx > maxx)
+                maxx = trx;
+            if (brx > maxx)
+                maxx = brx;
+            if (blx > maxx)
+                maxx = blx;
+            if (tr_y > maxy)
+                maxy = tr_y;
+            if (bry > maxy)
+                maxy = bry;
+            if (bly > maxy)
+                maxy = bly;
+            var r = new Rectangle((int)minx, (int)miny, (int)MathF.Ceiling(maxx - minx), (int)MathF.Ceiling(maxy - miny));
+            _viewBounds = r;
         }
 
         void WindowSizeChanged(object sender, EventArgs e)
