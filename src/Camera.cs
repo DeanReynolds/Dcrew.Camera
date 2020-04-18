@@ -292,6 +292,26 @@ namespace Dcrew.MonoGame._2D_Camera
         /// <summary>The camera Z required for sprites at Z <paramref name="targetZ"/> that should be drawn at scale <paramref name="zoom"/></summary>
         public float ZFromScale(float zoom, float targetZ) => 1 / zoom + targetZ;
 
+        /// <summary>A rectangle covering the view (in world coords). Accounts for <see cref="Angle"/>, <see cref="Scale"/> and every Z depth/layer in <paramref name="z"/></summary>
+        public Rectangle WorldBounds(params float[] z)
+        {
+            UpdateDirtyAngle();
+            Rectangle? r = null;
+            foreach (var l in z)
+            {
+                float zoomFromZ = ScaleFromZ(Z, l);
+                var dr = _viewBounds;
+                dr.Offset(X * zoomFromZ, Y * zoomFromZ);
+                dr.Width = (int)MathF.Ceiling(dr.Width / zoomFromZ);
+                dr.Height = (int)MathF.Ceiling(dr.Height / zoomFromZ);
+                if (r == null)
+                    r = dr;
+                else
+                    r = Rectangle.Union(r.Value, dr);
+            }
+            return r.Value;
+        }
+
         /// <summary>Will update <see cref="MouseXY"/>. Call once per frame and before using <see cref="MouseXY"/></summary>
         /// <param name="mouseState">null value will auto grab latest state</param>
         public void UpdateMouseXY(MouseState? mouseState = null)
