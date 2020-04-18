@@ -296,6 +296,12 @@ namespace Dcrew.MonoGame._2D_Camera
         public Rectangle WorldBounds(params float[] z)
         {
             UpdateDirtyAngle();
+            if (z.Length == 0)
+            {
+                var vb = _viewBounds;
+                vb.Offset(_xy);
+                return vb;
+            }
             Rectangle? r = null;
             foreach (var l in z)
             {
