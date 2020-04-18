@@ -96,8 +96,16 @@ namespace Dcrew.MonoGame._2D_Camera
         public Matrix Projection => _projectionMatrix;
         /// <summary>Matrix dedicated to <see cref="Origin"/></summary>
         public Matrix OriginMatrix => _originMatrix;
-        /// <summary>A rectangle covering the view (in world coords). Accounts for <see cref="Angle"/> and <see cref="Scale"/></summary>
-        public Rectangle Bounds => _viewBounds;
+        /// <summary>A rectangle covering the view (in world coords). Accounts for <see cref="Angle"/> and <see cref="Scale"/>. Use <see cref="Rectangle.Offset(float, float)"/> with <see cref="XY"/> to get it in world position</summary>
+        public Rectangle Bounds
+        {
+            get
+            {
+                UpdateDirtyAngle();
+                return _viewBounds;
+            }
+        }
+
         /// <summary>Mouse/Cursor world X/Y position, make sure to call <see cref="UpdateMouseXY(MouseState?)"/> once per frame before using this</summary>
         public Vector2 MouseXY => _mouseXY;
         /// <summary>Mouse/Cursor world X position, make sure to call <see cref="UpdateMouseXY(MouseState?)"/> once per frame before using this</summary>
@@ -300,6 +308,7 @@ namespace Dcrew.MonoGame._2D_Camera
             {
                 _rotCos = MathF.Cos(-Angle);
                 _rotSin = MathF.Sin(-Angle);
+                UpdateBounds();
                 _angleDirty = false;
             }
         }
@@ -307,7 +316,7 @@ namespace Dcrew.MonoGame._2D_Camera
         {
             VirtualScale = _hasVirtualRes ? MathF.Min((float)_viewportRes.Width / _virtualRes.Width, (float)_viewportRes.Height / _virtualRes.Height) : 1;
             Origin = new Vector2(_originMatrix.M41 = _origin.X / VirtualScale, _originMatrix.M42 = _origin.Y / VirtualScale);
-            UpdateBounds();
+            UpdateDirtyAngle();
         }
         void UpdateViewportRes(int width, int height)
         {
