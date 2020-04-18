@@ -96,7 +96,7 @@ namespace Dcrew.MonoGame._2D_Camera
         public Matrix Projection => _projectionMatrix;
         /// <summary>Matrix dedicated to <see cref="Origin"/></summary>
         public Matrix OriginMatrix => _originMatrix;
-        /// <summary>A rectangle covering the view (in world coords). Accounts for <see cref="Angle"/> and <see cref="Scale"/>. Use <see cref="Rectangle.Offset(float, float)"/> with <see cref="XY"/> to get it in world position</summary>
+        /// <summary>A rectangle covering the view (in screen coords). Accounts for <see cref="Angle"/> and <see cref="Scale"/>. Use <see cref="Rectangle.Offset(float, float)"/> with <see cref="XY"/> to get it in world position or is <see cref="WorldBounds(float[])"/> what you're looking for?</summary>
         public Rectangle Bounds
         {
             get
