@@ -271,7 +271,7 @@ namespace Dcrew.MonoGame._2D_Camera
         /// <summary>Converts screen coords to world coords</summary>
         public Point ScreenToWorld(Point xy, float z = 0) => ScreenToWorld(xy.X, xy.Y, z).ToPoint();
         /// <summary>Returns the scale of the world at Z <paramref name="z"/> in relation to the screen</summary>
-        public float ScreenToWorldScale(float z = 0) => 1 / Vector2.Distance(ScreenToWorld(0, 0,z), ScreenToWorld(1, 0,z));
+        public float ScreenToWorldScale(float z = 0) => 1 / Vector2.Distance(ScreenToWorld(0, 0, z), ScreenToWorld(1, 0, z));
         /// <summary>Converts world coords to screen coords</summary>
         public Vector2 WorldToScreen(float x, float y, float z = 0)
         {
@@ -285,7 +285,7 @@ namespace Dcrew.MonoGame._2D_Camera
         /// <summary>Converts world coords to screen coords</summary>
         public Point WorldToScreen(Point xy, float z = 0) => WorldToScreen(xy.X, xy.Y, z).ToPoint();
         /// <summary>Returns the scale of the screen in relation to the world at Z <paramref name="z"/></summary>
-        public float WorldToScreenScale(float z = 0) => Vector2.Distance(WorldToScreen(0, 0,z), WorldToScreen(1, 0,z));
+        public float WorldToScreenScale(float z = 0) => Vector2.Distance(WorldToScreen(0, 0, z), WorldToScreen(1, 0, z));
 
         /// <summary>The scale of <see cref="View(float)"/> at Z <paramref name="targetZ"/> from <paramref name="z"/></summary>
         public float ScaleFromZ(float z, float targetZ) => z - targetZ == 0 ? 0 : 1 / (z - targetZ);
