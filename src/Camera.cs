@@ -342,7 +342,10 @@ namespace Dcrew.MonoGame._2D_Camera
         {
             VirtualScale = _hasVirtualRes ? MathF.Min((float)_viewportRes.Width / _virtualRes.Width, (float)_viewportRes.Height / _virtualRes.Height) : 1;
             Origin = new Vector2(_originMatrix.M41 = _origin.X / VirtualScale, _originMatrix.M42 = _origin.Y / VirtualScale);
-            UpdateDirtyAngle();
+            if (_angleDirty)
+                UpdateDirtyAngle();
+            else
+                UpdateBounds();
         }
         void UpdateViewportRes(int width, int height)
         {
