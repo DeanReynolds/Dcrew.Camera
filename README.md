@@ -1,8 +1,8 @@
-# Dcrew.MonoGame.2D Camera
+# Dcrew.Camera
  A highly-optimized, flexible and powerful 2D camera for [MonoGame](https://github.com/MonoGame/MonoGame)
 
 ## Build
-### [NuGet](https://www.nuget.org/packages/Dcrew.MonoGame.2D_Camera) [![NuGet ver](https://img.shields.io/nuget/v/Dcrew.MonoGame.2D_Camera)](https://www.nuget.org/packages/Dcrew.MonoGame.2D_Camera) [![NuGet downloads](https://img.shields.io/nuget/dt/Dcrew.MonoGame.2D_Camera)](https://www.nuget.org/packages/Dcrew.MonoGame.2D_Camera)
+### [NuGet](https://www.nuget.org/packages/Dcrew.Camera) [![NuGet ver](https://img.shields.io/nuget/v/Dcrew.Camera)](https://www.nuget.org/packages/Dcrew.Camera) [![NuGet downloads](https://img.shields.io/nuget/dt/Dcrew.Camera)](https://www.nuget.org/packages/Dcrew.Camera)
 
 ## Features
 - Efficient math used for 2D matrices
