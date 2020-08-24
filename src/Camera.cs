@@ -4,7 +4,7 @@ using Microsoft.Xna.Framework.Input;
 using System;
 using System.Reflection;
 
-namespace Dcrew.MonoGame._2D_Camera
+namespace Dcrew.Camera
 {
     /// <summary>A highly-optimized, flexible and powerful 2D camera</summary>
     public sealed class Camera : IDisposable
