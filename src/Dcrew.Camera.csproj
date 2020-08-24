@@ -2,14 +2,14 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
-    <RootNamespace>Dcrew.MonoGame._2D_Camera</RootNamespace>
+    <RootNamespace>Dcrew.Camera</RootNamespace>
     <Authors>Dcrew</Authors>
     <Description>A highly-optimized, flexible and powerful 2D camera for MonoGame</Description>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
-    <RepositoryUrl>https://github.com/DeanReynolds/Dcrew.MonoGame.2D-Camera</RepositoryUrl>
+    <RepositoryUrl>https://github.com/DeanReynolds/Dcrew.Camera</RepositoryUrl>
     <PackageTags>MonoGame</PackageTags>
     <Company>DcrewGames</Company>
-    <PackageId>Dcrew.MonoGame.2D_Camera</PackageId>
+    <PackageId>Dcrew.Camera</PackageId>
     <Version>1.5.1</Version>
     <PackageIcon>icon.png</PackageIcon>
     <PackageIconUrl />
