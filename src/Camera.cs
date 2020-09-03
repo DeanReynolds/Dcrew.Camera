@@ -96,15 +96,6 @@ namespace Dcrew.Camera
         public Matrix Projection => _projectionMatrix;
         /// <summary>Matrix dedicated to <see cref="Origin"/></summary>
         public Matrix OriginMatrix => _originMatrix;
-        /// <summary>A rectangle covering the view (in screen coords). Accounts for <see cref="Angle"/> and <see cref="Scale"/>. Use <see cref="Rectangle.Offset(float, float)"/> with <see cref="XY"/> to get it in world position or is <see cref="WorldBounds(float[])"/> what you're looking for?</summary>
-        public Rectangle Bounds
-        {
-            get
-            {
-                UpdateDirtyAngle();
-                return _viewBounds;
-            }
-        }
 
         /// <summary>Mouse/Cursor world X/Y position, make sure to call <see cref="UpdateMouseXY(MouseState?)"/> once per frame before using this</summary>
         public Vector2 MouseXY => _mouseXY;
@@ -127,7 +118,6 @@ namespace Dcrew.Camera
             _virtualRes;
         bool _hasVirtualRes,
             _angleDirty;
-        Rectangle _viewBounds;
 
         /// <summary>Create a 2D camera</summary>
         /// <param name="xy">X/Y position</param>
@@ -292,30 +282,11 @@ namespace Dcrew.Camera
         /// <summary>The camera Z required for sprites at Z <paramref name="targetZ"/> that should be drawn at scale <paramref name="zoom"/></summary>
         public float ZFromScale(float zoom, float targetZ) => 1 / zoom + targetZ;
 
-        /// <summary>A rectangle covering the view (in world coords). Accounts for <see cref="Angle"/>, <see cref="Scale"/> and every Z depth/layer in <paramref name="z"/></summary>
-        public Rectangle WorldBounds(params float[] z)
+        /// <summary>A rectangle covering the view given <paramref name="z"/> (in world coords).</summary>
+        public Rectangle WorldBounds(float z = 0)
         {
-            UpdateDirtyAngle();
-            if (z.Length == 0)
-            {
-                var vb = _viewBounds;
-                vb.Offset(_xy);
-                return vb;
-            }
-            Rectangle? r = null;
-            foreach (var l in z)
-            {
-                float zoomFromZ = ScaleFromZ(Z, l);
-                var dr = _viewBounds;
-                dr.Offset(X * zoomFromZ, Y * zoomFromZ);
-                dr.Width = (int)MathF.Ceiling(dr.Width / zoomFromZ);
-                dr.Height = (int)MathF.Ceiling(dr.Height / zoomFromZ);
-                if (r == null)
-                    r = dr;
-                else
-                    r = Rectangle.Union(r.Value, dr);
-            }
-            return r.Value;
+            var s = ScreenToWorld(_viewportRes.Width / 2f * Scale.X, _viewportRes.Height / 2f * Scale.Y, z);
+            return new Rectangle(new Point((int)MathF.Floor(s.X), (int)MathF.Floor(s.Y)), new Point((int)(MathF.Ceiling(Origin.X / _scale.X) * 2), (int)(MathF.Ceiling(Origin.Y / _scale.Y) * 2)));
         }
 
         /// <summary>Will update <see cref="MouseXY"/>. Call once per frame and before using <see cref="MouseXY"/></summary>
@@ -334,7 +305,6 @@ namespace Dcrew.Camera
             {
                 _rotCos = MathF.Cos(-Angle);
                 _rotSin = MathF.Sin(-Angle);
-                UpdateBounds();
                 _angleDirty = false;
             }
         }
@@ -342,10 +312,6 @@ namespace Dcrew.Camera
         {
             VirtualScale = _hasVirtualRes ? MathF.Min((float)_viewportRes.Width / _virtualRes.Width, (float)_viewportRes.Height / _virtualRes.Height) : 1;
             Origin = new Vector2(_originMatrix.M41 = _origin.X / VirtualScale, _originMatrix.M42 = _origin.Y / VirtualScale);
-            if (_angleDirty)
-                UpdateDirtyAngle();
-            else
-                UpdateBounds();
         }
         void UpdateViewportRes(int width, int height)
         {
@@ -354,59 +320,6 @@ namespace Dcrew.Camera
             UpdateOrigin();
             _projectionMatrix.M11 = (float)(2d / _viewportRes.Width);
             _projectionMatrix.M22 = (float)(2d / -_viewportRes.Height);
-        }
-        void UpdateBounds()
-        {
-            float x = -Origin.X,
-                y = -Origin.Y,
-                w = MathF.Ceiling(Origin.X / _scale.X) + .5f,
-                h = MathF.Ceiling(Origin.Y / _scale.Y) + .5f,
-                xcos = x * _rotCos,
-                ycos = y * _rotCos,
-                xsin = x * _rotSin,
-                ysin = y * _rotSin,
-                wcos = w * _rotCos,
-                wsin = w * _rotSin,
-                hcos = h * _rotCos,
-                hsin = h * _rotSin,
-                tlx = xcos - ysin,
-                tly = xsin + ycos,
-                trx = wcos - ysin,
-                tr_y = wsin + ycos,
-                brx = wcos - hsin,
-                bry = wsin + hcos,
-                blx = xcos - hsin,
-                bly = xsin + hcos,
-                minx = tlx,
-                miny = tly,
-                maxx = minx,
-                maxy = miny;
-            if (trx < minx)
-                minx = trx;
-            if (brx < minx)
-                minx = brx;
-            if (blx < minx)
-                minx = blx;
-            if (tr_y < miny)
-                miny = tr_y;
-            if (bry < miny)
-                miny = bry;
-            if (bly < miny)
-                miny = bly;
-            if (trx > maxx)
-                maxx = trx;
-            if (brx > maxx)
-                maxx = brx;
-            if (blx > maxx)
-                maxx = blx;
-            if (tr_y > maxy)
-                maxy = tr_y;
-            if (bry > maxy)
-                maxy = bry;
-            if (bly > maxy)
-                maxy = bly;
-            var r = new Rectangle((int)minx, (int)miny, (int)MathF.Ceiling(maxx - minx), (int)MathF.Ceiling(maxy - miny));
-            _viewBounds = r;
         }
 
         void WindowSizeChanged(object sender, EventArgs e)
